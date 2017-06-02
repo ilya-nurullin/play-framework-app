@@ -20,7 +20,7 @@ class ErrorHandler @Inject() (
 
   override def onProdServerError(request: RequestHeader, exception: UsefulException) = {
     Future.successful(
-      InternalServerError(Json.toJson(Map("error_id" -> exception.id, "message" -> "Internal Server Error")))
+      InternalServerError(Json.obj("error_id" -> exception.id, "error" -> "internal_server_error"))
     )
   }
 }
