@@ -1,6 +1,7 @@
 package controllers
 
 import org.scalatestplus.play._
+import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import play.api.test._
 import play.api.test.Helpers._
 
@@ -10,7 +11,7 @@ import play.api.test.Helpers._
  *
  * For more information, see https://www.playframework.com/documentation/latest/ScalaTestingWithScalaTest
  */
-class HomeControllerSpec extends PlaySpec with OneAppPerTest {
+class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest {
 
   "HomeController GET" should {
 
@@ -19,8 +20,8 @@ class HomeControllerSpec extends PlaySpec with OneAppPerTest {
       val home = controller.index().apply(FakeRequest())
 
       status(home) mustBe OK
-      contentType(home) mustBe Some("text/html")
-      contentAsString(home) must include ("Welcome to Play")
+      contentType(home) mustBe Some("text/plain")
+      contentAsString(home) must include ("API is working fine!")
     }
 
     "render the index page from the application" in {
@@ -28,8 +29,8 @@ class HomeControllerSpec extends PlaySpec with OneAppPerTest {
       val home = controller.index().apply(FakeRequest())
 
       status(home) mustBe OK
-      contentType(home) mustBe Some("text/html")
-      contentAsString(home) must include ("Welcome to Play")
+      contentType(home) mustBe Some("text/plain")
+      contentAsString(home) must include ("API is working fine!")
     }
 
     "render the index page from the router" in {
@@ -38,8 +39,8 @@ class HomeControllerSpec extends PlaySpec with OneAppPerTest {
       val home = route(app, request).get
 
       status(home) mustBe OK
-      contentType(home) mustBe Some("text/html")
-      contentAsString(home) must include ("Welcome to Play")
+      contentType(home) mustBe Some("text/plain")
+      contentAsString(home) must include ("API is working fine!")
     }
   }
 }
