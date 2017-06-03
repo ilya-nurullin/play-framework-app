@@ -35,6 +35,12 @@ class UsersApiTokenDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, confi
     usersToken.filter(t => t.token === token && t.expiresAt >= DateTime.now()).take(1).result.headOption
   }
 
+  def updateToken(token: String) = dbConfig.db.run {
+    usersToken.filter(t => t.token === token && t.expiresAt >= DateTime.now()).map(_.expiresAt).update(
+      DateTime.now().plusDays(config.underlying.getInt("app.models.UsersApiToken.token.lifetime"))
+    )
+  }
+
   def removeOldUserAppTokens(appId: Int, userId: Int) = dbConfig.db.run {
     usersToken.filter(u => u.appId === appId && u.userId === userId).delete
   }

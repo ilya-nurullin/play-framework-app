@@ -19,8 +19,10 @@ class AccessTokenFilterAction @Inject() (usersApiToken: UsersApiTokenDAO, apiApp
           case Some(usersToken) =>
             request match {
               case req: RequestWithAppIdAndKey[A] =>
-                if (req.appId == usersToken.appId)
+                if (req.appId == usersToken.appId) {
+                  usersApiToken.updateToken(usersToken.token)
                   block(new UserRequest[A](usersToken.userId, usersToken.appId, appKey, request))
+                }
                 else
                   Future.successful(Results.Forbidden(JsonErrors.AccessTokenIsNotValid))
               case _ => throw new ClassCastException("AccessTokenFilterAction received no RequestWithAppIdAndKey request")

@@ -1,12 +1,13 @@
 package controllers
 
 import errorJsonBodies.JsonErrors
+import models.UsersApiTokenDAO
 import play.api.mvc.{Action, AnyContent}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import test.BaseSpec
+import test.{BaseSpec, FutureTest}
 
-trait AuthActionBehaviors extends BaseSpec {
+trait AuthActionBehaviors extends BaseSpec with FutureTest {
 
 
   def authAction(act: => Action[AnyContent]) = {
@@ -14,6 +15,24 @@ trait AuthActionBehaviors extends BaseSpec {
       "Response 200 OK if App-key and Access-token are ok" in {
         val getMethod = act.apply(fakeRequestWithRightAuthHeaders)
         status(getMethod) mustBe OK
+      }
+
+      "Update token lifetime on query" in {
+        val usersApiDAO = app.injector.instanceOf[UsersApiTokenDAO]
+
+        whenReady(usersApiDAO.getToken(rightAccessToken)) { tokenOpt =>
+          tokenOpt.isDefined mustBe true
+          val expiresAt = tokenOpt.get.expiresAt
+          act.apply(fakeRequestWithRightAuthHeaders)
+
+          Thread.sleep(500) // to be sure that time has changed
+
+          whenReady(usersApiDAO.getToken(rightAccessToken)) { newTokenOpt =>
+            newTokenOpt.isDefined mustBe true
+            tokenOpt.get.eq(newTokenOpt.get) mustBe false
+            newTokenOpt.get.expiresAt.getMillis must be > expiresAt.getMillis
+          }
+        }
       }
 
       "Response 403 FORBIDDEN if App-key !~> Access-key" in {

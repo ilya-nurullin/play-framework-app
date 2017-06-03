@@ -206,8 +206,8 @@ CREATE TABLE IF NOT EXISTS `users_has_api_tokens` (
 -- Дамп данных таблицы whipcake.users_has_api_tokens: ~2 rows (приблизительно)
 /*!40000 ALTER TABLE `users_has_api_tokens` DISABLE KEYS */;
 INSERT INTO `users_has_api_tokens` (`token`, `user_id`, `app_id`, `expires_at`) VALUES
-	('ft1IjFotneQESvMktZqVrQ4Xas0weJ', 1, 2, '2017-06-06 15:52:53'),
-	('PjdSyBX62WSq8b1IEOEFMfsjBYZcpP', 1, 1, '2017-06-06 15:32:53');
+	('ft1IjFotneQESvMktZqVrQ4Xas0weJ', 1, 2, DATEADD('DAY',17, NOW())),
+	('PjdSyBX62WSq8b1IEOEFMfsjBYZcpP', 1, 1, DATEADD('DAY',17, NOW()));
 /*!40000 ALTER TABLE `users_has_api_tokens` ENABLE KEYS */;
 
 -- Дамп структуры для таблица whipcake.user_has_project
