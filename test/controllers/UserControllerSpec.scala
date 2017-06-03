@@ -30,10 +30,10 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
       (json \ "passHash").asOpt[String] mustBe None
     }
 
-    "Response 200 OK null if user is not found" in {
+    "Response 404 Not Found null if user is not found" in {
       val getMethod = controller.get(100).apply(fakeRequestWithRightAuthHeaders)
 
-      status(getMethod) mustBe OK
+      status(getMethod) mustBe NOT_FOUND
       contentType(getMethod) mustBe Some("application/json")
       contentAsJson(getMethod) mustBe JsNull
     }
