@@ -70,4 +70,20 @@ trait AuthActionBehaviors extends BaseSpec with FutureTest {
       }
     }
   }
+
+  def filterOnlyObjectOwnerAllowed(allowAction: => Action[AnyContent], denyAction: => Action[AnyContent]) = {
+    "Allow access only for an object owner" should {
+      "Allow access for object owner" in {
+        val updateMethod = allowAction.apply(fakeRequestWithRightAuthHeaders)
+
+        status(updateMethod) mustBe OK
+      }
+      "Deny access for other accounts" in {
+        val updateMethod = denyAction.apply(fakeRequestWithRightAuthHeaders)
+
+        status(updateMethod) mustBe FORBIDDEN
+        contentAsJson(updateMethod) mustBe JsonErrors.ChangingSomeoneElsesObject
+      }
+    }
+  }
 }

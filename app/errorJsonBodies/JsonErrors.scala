@@ -1,7 +1,7 @@
 package errorJsonBodies
 
 import actions.Actions
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{JsObject, JsValue, Json}
 
 case class JsonError(error: String, data: Option[JsObject] = None) {
 }
@@ -24,5 +24,9 @@ object JsonErrors {
   lazy val AccessTokenIsNotValid = Json.toJson(JsonError(s"${accessTokenHeaderName}_is_not_valid"))
   lazy val NeedAccessTokenHeader = Json.toJson(JsonError(s"need_${accessTokenHeaderName}_header"))
 
+  lazy val ChangingSomeoneElsesObject = Json.toJson(JsonError("changing_someone_elses_object"))
+
+  def BadData(errors: JsObject) = Json.toJson(JsonError("bad_data", Some(errors)))
+  def BadData(errors: JsValue) = Json.toJson(JsonError("bad_data", Some(errors.asInstanceOf[JsObject])))
 
 }
