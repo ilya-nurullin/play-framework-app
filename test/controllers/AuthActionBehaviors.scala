@@ -12,9 +12,9 @@ trait AuthActionBehaviors extends BaseSpec with FutureTest {
 
   def authAction(act: => Action[AnyContent]) = {
     "be under AuthAction" should {
-      "Response 200 OK if App-key and Access-token are ok" in {
+      "NOT Response 401 or 403 if App-key and Access-token are ok" in {
         val getMethod = act.apply(fakeRequestWithRightAuthHeaders)
-        status(getMethod) mustBe OK
+        status(getMethod) must (not be FORBIDDEN or not be UNAUTHORIZED)
       }
 
       "Update token lifetime on query" in {
@@ -76,7 +76,7 @@ trait AuthActionBehaviors extends BaseSpec with FutureTest {
       "Allow access for object owner" in {
         val updateMethod = allowAction.apply(fakeRequestWithRightAuthHeaders)
 
-        status(updateMethod) mustBe OK
+        status(updateMethod) must not be FORBIDDEN
       }
       "Deny access for other accounts" in {
         val updateMethod = denyAction.apply(fakeRequestWithRightAuthHeaders)
