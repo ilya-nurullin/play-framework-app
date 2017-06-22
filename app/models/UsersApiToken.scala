@@ -8,8 +8,6 @@ import slick.jdbc.JdbcProfile
 import slick.lifted.{TableQuery, Tag}
 import slick.jdbc.MySQLProfile.api._
 import com.github.tototoshi.slick.MySQLJodaSupport._
-import play.api.db
-
 import scala.concurrent.Future
 import scala.util.Random
 

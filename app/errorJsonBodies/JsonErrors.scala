@@ -3,8 +3,7 @@ package errorJsonBodies
 import actions.Actions
 import play.api.libs.json.{JsObject, JsValue, Json}
 
-case class JsonError(error: String, data: Option[JsObject] = None) {
-}
+case class JsonError(error: String, data: Option[JsObject] = None)
 
 object JsonErrors {
   implicit lazy val jsonErrorWrites = Json.writes[JsonError]
@@ -25,6 +24,10 @@ object JsonErrors {
   lazy val NeedAccessTokenHeader = Json.toJson(JsonError(s"need_${accessTokenHeaderName}_header"))
 
   lazy val ChangingSomeoneElsesObject = Json.toJson(JsonError("changing_someone_elses_object"))
+
+  lazy val EmptyRequest = Json.toJson(JsonError("empty_request"))
+  lazy val LoginDuplication = Json.toJson(JsonError("login_duplication"))
+  lazy val EmailDuplication = Json.toJson(JsonError("email_duplication"))
 
   def BadData(errors: JsObject) = Json.toJson(JsonError("bad_data", Some(errors)))
   def BadData(errors: JsValue) = Json.toJson(JsonError("bad_data", Some(errors.asInstanceOf[JsObject])))

@@ -4,6 +4,7 @@ import javax.inject._
 
 import actions.Actions
 import errorJsonBodies.JsonErrors
+import helpers.DateHelper
 import models.{UserDAO, UsersApiTokenDAO}
 import play.api.libs.json._
 import play.api.libs.mailer.{Email, MailerClient}
@@ -11,14 +12,13 @@ import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import play.api.data._
+import play.api.data.Forms._
 
 @Singleton
 class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient: MailerClient, usersApiTokenDAO: UsersApiTokenDAO) extends Controller {
   val AuthAction = actions.AuthAction
   implicit val fullUserFormat = Json.format[FullUserJson]
-
-  case class FullUserJson(id: Int, login: String, name: Option[String], avatar: Option[String], cityId: Option[Int], userRankId: Int,
-                          isBanned: Boolean)
 
   def get(id: Int) = AuthAction.async {
     userDAO.getById(id).map { userOpt =>
@@ -27,7 +27,7 @@ class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient
           user.userRankId, user.isBanned))
 
         Ok(jsonUser)
-      } getOrElse Ok(JsNull)
+      } getOrElse NotFound(JsNull)
     }
   }
 
@@ -54,11 +54,72 @@ class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient
     } getOrElse Future.successful(BadRequest(JsonErrors.CannotCreateUser))
   }
 
-  /*def update(userId: Int) = AuthAction.async { request =>
-    if (request.userId != userId)
-      return Future.successful(Forbidden("Only your account can be updated"))
-    else {
+  def update(userId: Int) = AuthAction.async { implicit request =>
+    import errorJsonBodies.JsonErrors
+
+    Actions.filterOnlyObjectOwnerAllowed(userId) {
+
+      val jsonUser = Form(
+        mapping(
+          "login" -> nonEmptyText,
+          "email" -> email,
+          "name" -> optional(nonEmptyText),
+          "avatar" -> optional(nonEmptyText),
+          "aboutMyself" -> optional(text),
+          "dateOfBirth" -> optional(text),
+          "sex" -> optional(boolean),
+          "cityId" -> optional(number)
+        )(UserToUpdate.apply)(UserToUpdate.unapply)
+      )
+
+      jsonUser.bindFromRequest.fold (
+        formWithErrors => {
+          val errors = formWithErrors.errors.foldLeft(Map[String, String]()) { (m, e) => m + (e.key -> e.message) }
+          Future.successful(BadRequest(JsonErrors.BadData(Json.toJson(errors))))
+        },
+        userData => {
+          userDAO.update(userId, userData.login, userData.email, userData.name, userData.avatar, userData.aboutMyself,
+            userData.dateOfBirth.map(DateHelper.sqlDateStringToDate), userData.sex, userData.cityId).map { user =>
+
+            val jsonUser = Json.toJson(FullUserJson(user.id, user.login, user.name, user.avatar, user.cityId,
+              user.userRankId, user.isBanned))
+            Ok(jsonUser)
+
+          }.recover {
+            //case e: java.sql.SQLIntegrityConstraintViolationException => // only for MySql, doesn't work for h2
+            case e: Exception =>
+              if (e.getMessage.toUpperCase.contains("LOGIN_UNIQUE"))
+                BadRequest(JsonErrors.LoginDuplication)
+              else if (e.getMessage.toUpperCase.contains("EMAIL_UNIQUE"))
+                BadRequest(JsonErrors.EmailDuplication)
+              else
+                throw e
+          }
+        }
+      )
 
     }
-  }*/
+  }
+
+
+  case class FullUserJson(
+                           id: Int,
+                           login: String,
+                           name: Option[String],
+                           avatar: Option[String],
+                           cityId: Option[Int],
+                           userRankId: Int,
+                           isBanned: Boolean
+                         )
+
+  case class UserToUpdate(
+                           login: String,
+                           email: String,
+                           name: Option[String],
+                           avatar: Option[String],
+                           aboutMyself: Option[String],
+                           dateOfBirth: Option[String],
+                           sex: Option[Boolean],
+                           cityId: Option[Int]
+                         )
 }

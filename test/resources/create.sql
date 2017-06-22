@@ -158,7 +158,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `is_banned` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `login_UNIQUE` (`login`),
-  UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `email_UNIQUE` (`email`),
   KEY `fk_users_cities1_idx` (`city_id`),
   KEY `fk_users_user_ranks1_idx` (`user_rank_id`),
   CONSTRAINT `fk_users_cities1` FOREIGN KEY (`city_id`) REFERENCES `cities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -169,7 +169,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` (`id`, `login`, `email`, `pass_hash`, `name`, `avatar`, `about_myself`, `date_of_birth`, `sex`, `created_at`, `updated_at`, `city_id`, `statuses`, `user_rank_id`, `premium_until`, `is_banned`) VALUES
 	(1, 'testLogin', 'test', '$2a$10$bM4MbiT5.SIZV/HWyQFuDeu1dLpF/9Sun2f9H6HRruCCKLTAVfFxq', 'testName', 'testAvatar', NULL, NULL, NULL, '2017-05-01 21:10:14', '2017-05-20 10:33:09', 1, NULL, 1, NULL, 0),
-	(2, 'id2', 'newTest', '$2a$10$ExnMSd2gA.oeMebTAcq9iujqSbKfLVoWwJEH/RJWP6LahRULm1/Hi', NULL, NULL, NULL, NULL, NULL, '2017-05-20 21:28:57', '2017-05-20 21:28:58', NULL, NULL, 1, NULL, 0);
+	(2, 'id2', 'testemail@testdomain.test', '$2a$10$ExnMSd2gA.oeMebTAcq9iujqSbKfLVoWwJEH/RJWP6LahRULm1/Hi', NULL, NULL, NULL, NULL, NULL, '2017-05-20 21:28:57', '2017-05-20 21:28:58', NULL, NULL, 1, NULL, 0);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 
 -- Дамп структуры для таблица whipcake.habits

@@ -71,4 +71,85 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
       }
     }
   }
+
+  "User controller PUT" should {
+    val controller = app.injector.instanceOf[UserController]
+
+    behave like authAction(controller.update(1))
+
+    behave like filterOnlyObjectOwnerAllowed(controller.update(1), controller.update(2))
+
+    "Change all user fields in DB and response updated user" in {
+      val newEmail = "newemail@testdomain.test"
+      val newLogin = "newLogin"
+      val newName = "newName"
+      val newAvatar = "newAvatar"
+      val newAboutMyself = "newAboutMyself"
+      val newDateOfBirth = "2017-04-01"
+      val newSex = true
+      val newCityId = 1
+
+      val updateMethod = controller.update(1).apply(fakeRequestWithRightAuthHeaders.withJsonBody(Json.obj(
+        "email" -> newEmail,
+        "login" -> newLogin,
+        "name" -> newName,
+        "avatar" -> newAvatar,
+        "aboutMyself" -> newAboutMyself,
+        "dateOfBirth" -> newDateOfBirth,
+        "sex" -> newSex,
+        "cityId" -> newCityId
+      )))
+
+      status(updateMethod) mustBe OK
+      val jsonResponse = contentAsJson(updateMethod)
+      (jsonResponse \ "login").as[String] mustBe newLogin
+      (jsonResponse \ "name").as[String] mustBe newName
+      (jsonResponse \ "avatar").as[String] mustBe newAvatar
+      (jsonResponse \ "cityId").as[Int] mustBe newCityId
+
+      whenReady(app.injector.instanceOf[UserDAO].getById(1)) { userOpt =>
+        userOpt.isDefined mustBe true
+        val user = userOpt.get
+        user.email mustBe newEmail
+        user.login mustBe newLogin
+        user.name.get mustBe newName
+        user.avatar.get mustBe newAvatar
+        user.aboutMyself.get mustBe newAboutMyself
+        user.dateOfBirth.get.toString mustBe newDateOfBirth
+        user.sex.get mustBe newSex
+        user.cityId.get mustBe newCityId
+      }
+    }
+
+    "Show error on error in email" in {
+      val updateMethodEmailError = controller.update(1).apply(fakeRequestWithRightAuthHeaders.withJsonBody(Json.obj(
+        "email" -> "newEmail",
+        "login" -> "newLogin"
+      )))
+
+      status(updateMethodEmailError) mustBe BAD_REQUEST
+      val jsonResponse = contentAsJson(updateMethodEmailError)
+      (jsonResponse \ "error").as[String] mustBe "bad_data"
+      (jsonResponse \ "data" \ "email").as[String] mustBe "error.email"
+    }
+
+    "Show error on unique fields duplication" in {
+      import errorJsonBodies.JsonErrors
+      val updateMethodEmailDuplication = controller.update(1).apply(fakeRequestWithRightAuthHeaders.withJsonBody(Json.obj(
+        "email" -> "testemail@testdomain.test",
+        "login" -> "newLogin"
+      )))
+
+      val updateMethodLoginDuplication = controller.update(1).apply(fakeRequestWithRightAuthHeaders.withJsonBody(Json.obj(
+        "email" -> "newemail@testdomain.test",
+        "login" -> "id2"
+      )))
+
+      status(updateMethodEmailDuplication) mustBe BAD_REQUEST
+      status(updateMethodLoginDuplication) mustBe BAD_REQUEST
+
+      contentAsJson(updateMethodEmailDuplication) mustBe JsonErrors.EmailDuplication
+      contentAsJson(updateMethodLoginDuplication) mustBe JsonErrors.LoginDuplication
+    }
+  }
 }
