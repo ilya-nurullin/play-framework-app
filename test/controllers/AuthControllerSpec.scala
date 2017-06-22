@@ -24,7 +24,7 @@ class AuthControllerSpec extends BaseSpec with FutureTest {
 
     "Logout action" in {
       val logoutMethod = controller.logout().apply(fakeRequestWithRightAuthHeaders)
-      status(logoutMethod) mustBe OK
+      status(logoutMethod) mustBe NO_CONTENT
       contentAsString(logoutMethod) mustBe ""
 
       whenReady(app.injector.instanceOf[UsersApiTokenDAO].getToken(rightAccessToken)) { tokenOpt =>
