@@ -11,7 +11,7 @@ object JsonErrors {
   private val accessTokenHeaderName = Actions.AccessTokenHeaderName.replace('-', '_').toLowerCase
 
   lazy val JsonExpected = Json.toJson(JsonError("json_expected"))
-  lazy val EmailOrPasswordNotFound = Json.toJson(JsonError("email_or_password_not_found"))
+  lazy val EmailAndPasswordExpected = Json.toJson(JsonError("email_and_password_expected"))
   lazy val CannotCreateUser = Json.toJson(JsonError("cannot_create_user"))
   lazy val BadCredentials = Json.toJson(JsonError("bad_credentials"))
   lazy val EmailAlreadySignedUp = Json.toJson(JsonError("email_already_signed_up"))

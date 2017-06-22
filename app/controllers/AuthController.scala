@@ -23,7 +23,7 @@ class AuthController @Inject() (userDAO: UserDAO, usersApiTokenDAO: UsersApiToke
       val passwordOpt = (js \ "password").get.asOpt[String]
 
       if (emailOpt.isEmpty || passwordOpt.isEmpty)
-        Future.successful(BadRequest(JsonErrors.EmailOrPasswordNotFound))
+        Future.successful(BadRequest(JsonErrors.EmailAndPasswordExpected))
       else {
         val email = emailOpt.get
         val password = passwordOpt.get

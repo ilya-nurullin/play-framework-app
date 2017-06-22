@@ -23,8 +23,8 @@ class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient
   def get(id: Int) = AuthAction.async {
     userDAO.getById(id).map { userOpt =>
       userOpt.map { user =>
-        val jsonUser = Json.toJson(FullUserJson(user.id, user.login, user.name, user.avatar, user.cityId,
-          user.userRankId, user.isBanned))
+        val jsonUser = Json.toJson(FullUserJson(user.id, user.login, user.name, user.avatar, user.aboutMyself, user.sex,
+          user.cityId, user.userRankId, user.isBanned))
 
         Ok(jsonUser)
       } getOrElse NotFound(JsNull)
@@ -37,7 +37,7 @@ class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient
       val passwordOpt = (js \ "password").get.asOpt[String]
 
       if (emailOpt.isEmpty || passwordOpt.isEmpty)
-        Future.successful(BadRequest(JsonErrors.EmailOrPasswordNotFound))
+        Future.successful(BadRequest(JsonErrors.EmailAndPasswordExpected))
       else {
         import org.mindrot.jbcrypt.BCrypt
 
@@ -81,8 +81,8 @@ class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient
           userDAO.update(userId, userData.login, userData.email, userData.name, userData.avatar, userData.aboutMyself,
             userData.dateOfBirth.map(DateHelper.sqlDateStringToDate), userData.sex, userData.cityId).map { user =>
 
-            val jsonUser = Json.toJson(FullUserJson(user.id, user.login, user.name, user.avatar, user.cityId,
-              user.userRankId, user.isBanned))
+            val jsonUser = Json.toJson(FullUserJson(user.id, user.login, user.name, user.avatar, user.aboutMyself, user.sex,
+              user.cityId, user.userRankId, user.isBanned))
             Ok(jsonUser)
 
           }.recover {
@@ -107,6 +107,8 @@ class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient
                            login: String,
                            name: Option[String],
                            avatar: Option[String],
+                           aboutMyself: Option[String],
+                           sex: Option[Boolean],
                            cityId: Option[Int],
                            userRankId: Int,
                            isBanned: Boolean
