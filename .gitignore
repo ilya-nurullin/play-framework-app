@@ -2,7 +2,6 @@ logs
 target
 gradle
 
-/build.sbt
 /gradlew
 /gradlew.bat
 /build.gradle
