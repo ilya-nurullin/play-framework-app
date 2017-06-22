@@ -6,7 +6,7 @@
 # An example controller showing a sample home page
 GET           /                     controllers.HomeController.index
 
-POST          /auth                 controllers.AuthController.auth
+POST          /auth/email           controllers.AuthController.emailAuth
 DELETE        /auth                 controllers.AuthController.logout
 
 GET           /users/:id            controllers.UserController.get(id: Int)

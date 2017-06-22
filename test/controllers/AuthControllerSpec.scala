@@ -11,7 +11,7 @@ class AuthControllerSpec extends BaseSpec with FutureTest {
     val controller = app.injector.instanceOf[AuthController]
 
     "Deny access without App-key header" in {
-      val authMethod = controller.auth().apply(FakeRequest())
+      val authMethod = controller.emailAuth().apply(FakeRequest())
 
       status(authMethod) mustBe UNAUTHORIZED
       contentType(authMethod) mustBe Some("application/json")

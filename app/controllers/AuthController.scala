@@ -14,7 +14,7 @@ import scala.concurrent.Future
 
 @Singleton
 class AuthController @Inject() (userDAO: UserDAO, usersApiTokenDAO: UsersApiTokenDAO, actions: Actions) extends Controller {
-  def auth() = actions.AppIdFilterAction.async { request =>
+  def emailAuth() = actions.AppIdFilterAction.async { request =>
     import json.implicits.formats.DateJsonFormat._
     import org.mindrot.jbcrypt.BCrypt
 
