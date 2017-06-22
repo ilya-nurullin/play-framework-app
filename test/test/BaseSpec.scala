@@ -12,7 +12,7 @@ abstract class BaseSpec extends PlaySpec with GuiceOneAppPerSuite {
   val rightAppKey = "1"
 
   val fakeRequestWithRightAppKeyHeader = FakeRequest().withHeaders("App-key" -> rightAppKey)
-  val fakeRequestWithWrongAppKeyHeader = FakeRequest().withHeaders("App-key" -> "wrong app key")
+  val fakeRequestWithWrongAppKeyHeader = FakeRequest().withHeaders("App-key" -> "wrong helpers key")
 
   val fakeRequestWithRightAuthHeaders = FakeRequest().withHeaders(
     "App-key" -> rightAppKey, "Access-token" -> rightAccessToken)
@@ -21,11 +21,10 @@ abstract class BaseSpec extends PlaySpec with GuiceOneAppPerSuite {
     "App-key" -> rightAppKey, "Access-token" -> "wrong access token")
 
   val fakeRequestWith_WrongAppKey_RightAccessToken = FakeRequest().withHeaders(
-    "App-key" -> "wrong app key", "Access-token" -> rightAccessToken)
+    "App-key" -> "wrong helpers key", "Access-token" -> rightAccessToken)
 
   val fakeRequestWithWrongAppKeyAccessToken = FakeRequest().withHeaders(
-    "App-key" -> "wrong app key", "Access-token" -> "wrong access token")
-
+    "App-key" -> "wrong helpers key", "Access-token" -> "wrong access token")
 
   override def fakeApplication() = new GuiceApplicationBuilder().configure(Map(
     "slick.dbs.default.driver" -> "slick.driver.H2Driver$",
