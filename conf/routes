@@ -13,7 +13,11 @@ GET           /users/:id            controllers.UserController.get(id: Int)
 POST          /users                controllers.UserController.create
 PUT           /users/:id            controllers.UserController.update(id: Int)
 
-GET           /tasks/:taskId        controllers.TaskController.get(taskId: Int)
+GET           /tasks                controllers.TaskController.getLatestTasks(start_with: Long ?= 0)
+POST          /tasks                controllers.TaskController.create
+GET           /tasks/:taskId        controllers.TaskController.get(taskId: Long)
+PUT           /tasks/:taskId        controllers.TaskController.update(taskId: Long)
+DELETE        /tasks/:taskId        controllers.TaskController.delete(taskId: Long)
 
 # Map static resources from the /public folder to the /assets URL path
-GET           /assets/*file         controllers.Assets.versioned(path="/public", file: Asset)
+#GET           /assets/*file         controllers.Assets.versioned(path="/public", file: Asset)

@@ -24,6 +24,8 @@ object JsonErrors {
   lazy val NeedAccessTokenHeader = Json.toJson(JsonError(s"need_${accessTokenHeaderName}_header"))
 
   lazy val ChangingSomeoneElsesObject = Json.toJson(JsonError("changing_someone_elses_object"))
+  lazy val GettingSomeoneElsesObject = Json.toJson(JsonError("getting_someone_elses_object"))
+  lazy val DeletingSomeoneElsesObject = Json.toJson(JsonError("deleting_someone_elses_object"))
 
   lazy val EmptyRequest = Json.toJson(JsonError("empty_request"))
   lazy val LoginDuplication = Json.toJson(JsonError("login_duplication"))

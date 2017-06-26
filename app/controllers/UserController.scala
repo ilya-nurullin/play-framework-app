@@ -6,14 +6,14 @@ import actions.Actions
 import errorJsonBodies.JsonErrors
 import helpers.DateHelper
 import models.{UserDAO, UsersApiTokenDAO}
+import play.api.data.Forms._
+import play.api.data._
 import play.api.libs.json._
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import play.api.data._
-import play.api.data.Forms._
 
 @Singleton
 class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient: MailerClient, usersApiTokenDAO: UsersApiTokenDAO) extends Controller {
@@ -47,7 +47,7 @@ class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient
           usersApiTokenDAO.generateToken(request.appId, userId).map {
             case (token, expiresAt) =>
               Ok(Json.obj("token" -> token, "expiresAt" -> expiresAt)).withHeaders("Location" -> routes.UserController.get(userId).url)
-            case _ => Ok("")
+            case _ => Ok(JsNull)
           }
         }.recover { case _: java.sql.SQLIntegrityConstraintViolationException => Conflict(JsonErrors.EmailAlreadySignedUp)}
       }

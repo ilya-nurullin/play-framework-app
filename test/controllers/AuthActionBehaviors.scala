@@ -23,15 +23,17 @@ trait AuthActionBehaviors extends BaseSpec with FutureTest {
         whenReady(usersApiDAO.getToken(rightAccessToken)) { tokenOpt =>
           tokenOpt.isDefined mustBe true
           val expiresAt = tokenOpt.get.expiresAt
-          act.apply(fakeRequestWithRightAuthHeaders)
 
-          Thread.sleep(500) // to be sure that time has changed
+          whenReady(act.apply(fakeRequestWithRightAuthHeaders)) { _ =>
+            whenReady(usersApiDAO.getToken(rightAccessToken)) { newTokenOpt =>
+              newTokenOpt.isDefined mustBe true
+              tokenOpt.get.eq(newTokenOpt.get) mustBe false
 
-          whenReady(usersApiDAO.getToken(rightAccessToken)) { newTokenOpt =>
-            newTokenOpt.isDefined mustBe true
-            tokenOpt.get.eq(newTokenOpt.get) mustBe false
-            newTokenOpt.get.expiresAt.getMillis must be > expiresAt.getMillis
+              assume(newTokenOpt.get.expiresAt.getMillis > expiresAt.getMillis)
+              newTokenOpt.get.expiresAt.getMillis must be > expiresAt.getMillis
+            }
           }
+
         }
       }
 
@@ -82,7 +84,11 @@ trait AuthActionBehaviors extends BaseSpec with FutureTest {
         val updateMethod = denyAction.apply(fakeRequestWithRightAuthHeaders)
 
         status(updateMethod) mustBe FORBIDDEN
-        contentAsJson(updateMethod) mustBe JsonErrors.ChangingSomeoneElsesObject
+        contentAsJson(updateMethod) must matchPattern {
+          case JsonErrors.ChangingSomeoneElsesObject =>
+          case JsonErrors.GettingSomeoneElsesObject =>
+          case JsonErrors.DeletingSomeoneElsesObject =>
+        }
       }
     }
   }

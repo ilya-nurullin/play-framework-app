@@ -26,13 +26,25 @@ abstract class BaseSpec extends PlaySpec with GuiceOneAppPerSuite {
   val fakeRequestWithWrongAppKeyAccessToken = FakeRequest().withHeaders(
     "App-key" -> "wrong helpers key", "Access-token" -> "wrong access token")
 
+//  override def fakeApplication() = new GuiceApplicationBuilder().configure(Map(
+//    "slick.dbs.default.driver" -> "slick.driver.H2Driver$",
+//    "slick.dbs.default.db.driver" -> "org.h2.Driver",
+//    "slick.dbs.default.db.url" -> "jdbc:h2:mem:play;MODE=MYSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;INIT=RUNSCRIPT FROM 'test/resources/create.sql'\\;",
+//    "slick.dbs.default.db.numThreads" -> "2",
+//    "slick.dbs.default.db.queueSize" -> "2"
+//  )).in(Mode.Test).build()
+
+  app.injector.instanceOf[SqlSetupScriptRunner]
+
   override def fakeApplication() = new GuiceApplicationBuilder().configure(Map(
-    "slick.dbs.default.driver" -> "slick.driver.H2Driver$",
-    "slick.dbs.default.db.driver" -> "org.h2.Driver",
-    "slick.dbs.default.db.url" -> "jdbc:h2:mem:play;MODE=MYSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;INIT=RUNSCRIPT FROM 'test/resources/create.sql'\\;",
-    "slick.dbs.default.db.numThreads" -> "2",
-    "slick.dbs.default.db.queueSize" -> "2"
-  )).in(Mode.Test).build()
+    "slick.dbs.default.driver" -> "slick.driver.MySQLDriver$",
+    "slick.dbs.default.db.driver" -> "com.mysql.cj.jdbc.Driver",
+    "slick.dbs.default.db.url" -> "jdbc:mysql://root:***REMOVED***@localhost/test_whipcake?useSSL=false&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC",
+    "slick.dbs.default.db.numThreads" -> "6",
+    "slick.dbs.default.db.queueSize" -> "6"/*,
+    "db.default.driver" -> "com.mysql.cj.jdbc.Driver",
+    "db.default.url" -> "jdbc:mysql://root:***REMOVED***@localhost/test-whipcake?useSSL=false&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC"
+  */)).in(Mode.Test).build()
 }
 
 trait FutureTest extends Futures with ScalaFutures

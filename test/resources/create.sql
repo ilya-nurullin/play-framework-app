@@ -5,11 +5,6 @@
 -- HeidiSQL Версия:              9.4.0.5156
 -- --------------------------------------------------------
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET NAMES utf8 */;
-/*!50503 SET NAMES utf8mb4 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
 -- Дамп структуры для таблица whipcake.api_apps
 DROP TABLE IF EXISTS `api_apps`;
@@ -64,9 +59,6 @@ INSERT INTO `cities` (`id`, `name`, `country_id`) VALUES
 /*!40000 ALTER TABLE `cities` ENABLE KEYS */;
 
 
--- Дамп данных таблицы whipcake.habits: ~0 rows (приблизительно)
-/*!40000 ALTER TABLE `habits` DISABLE KEYS */;
-/*!40000 ALTER TABLE `habits` ENABLE KEYS */;
 
 -- Дамп структуры для таблица whipcake.projects
 DROP TABLE IF EXISTS `projects`;
@@ -104,7 +96,8 @@ CREATE TABLE IF NOT EXISTS `tasks` (
 -- Дамп данных таблицы whipcake.tasks: ~1 rows (приблизительно)
 /*!40000 ALTER TABLE `tasks` DISABLE KEYS */;
 INSERT INTO `tasks` (`id`, `title`, `description`, `deadline`, `data`, `importance`, `complexity`, `created_at`, `updated_at`, `is_archived`) VALUES
-	(1, 'фыв', 'вфы', NULL, '{"key": "val"}', NULL, NULL, '2017-05-29 17:17:37', '2017-05-29 21:37:14', 0);
+	(1, 'First test task', 'descr1', NULL, '{"key": "val"}', 1, 3, '2017-05-29 17:17:37', '2017-05-29 21:37:14', 0),
+	(2, 'Second test task', 'descr2', NULL, '{"key": "val"}', 3, 1, '2017-05-29 17:17:37', '2017-05-29 21:37:14', 0);
 /*!40000 ALTER TABLE `tasks` ENABLE KEYS */;
 
 -- Дамп структуры для таблица whipcake.project_has_task
@@ -241,10 +234,6 @@ CREATE TABLE IF NOT EXISTS `user_has_task` (
 -- Дамп данных таблицы whipcake.user_has_task: ~1 rows (приблизительно)
 /*!40000 ALTER TABLE `user_has_task` DISABLE KEYS */;
 INSERT INTO `user_has_task` (`user_id`, `task_id`) VALUES
-	(1, 1);
-/*!40000 ALTER TABLE `user_has_task` ENABLE KEYS */;
+	(1, 1),
+	(2, 2);
 
-
-/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
-/*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
