@@ -53,9 +53,7 @@ class UsersApiTokenDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, confi
     val expiresAt = DateTime.now().plusDays(config.underlying.getInt("app.models.UsersApiToken.token.lifetime"))
 
     val query = dbConfig.db.run {
-      DBIO.seq(
-        usersToken += UsersApiToken(tokenLength, userId, appId, expiresAt)
-      )
+      usersToken += UsersApiToken(tokenLength, userId, appId, expiresAt)
     }
 
     query.map(_ => (tokenLength, expiresAt)).recoverWith {

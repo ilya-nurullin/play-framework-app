@@ -4,7 +4,7 @@ import javax.inject._
 
 import actions.Actions
 import errorJsonBodies.JsonErrors
-import helpers.DateHelper
+import helpers.{DateHelper, JsonFormHelper}
 import models.{UserDAO, UsersApiTokenDAO}
 import play.api.data.Forms._
 import play.api.data._
@@ -14,6 +14,7 @@ import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import json.implicits.formats.DateJsonFormat._
 
 @Singleton
 class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient: MailerClient, usersApiTokenDAO: UsersApiTokenDAO) extends Controller {
@@ -31,32 +32,36 @@ class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient
     }
   }
 
-  def create() = actions.AppIdFilterAction.async { request =>
-    request.body.asJson.map { js =>
-      val emailOpt = (js \ "email").get.asOpt[String]
-      val passwordOpt = (js \ "password").get.asOpt[String]
+  def create() = actions.AppIdFilterAction.async { implicit request =>
+    import org.mindrot.jbcrypt.BCrypt
 
-      if (emailOpt.isEmpty || passwordOpt.isEmpty)
-        Future.successful(BadRequest(JsonErrors.EmailAndPasswordExpected))
-      else {
-        import org.mindrot.jbcrypt.BCrypt
+    val jsonRequest = Form(
+      tuple(
+        "email" -> email,
+        "password" -> nonEmptyText
+      )
+    )
 
-        userDAO.create(emailOpt.get, BCrypt.hashpw(passwordOpt.get, BCrypt.gensalt())).flatMap { userId =>
-          mailerClient.send(Email("Поздравляем Вас с регистрацией", "Whipcake <noreply@whipcake.com>", Seq(emailOpt.get),
-            Some("Поздравляем Вас с успешной регистрацией в Whipcake!")))
-          usersApiTokenDAO.generateToken(request.appId, userId).map {
-            case (token, expiresAt) =>
-              Ok(Json.obj("token" -> token, "expiresAt" -> expiresAt)).withHeaders("Location" -> routes.UserController.get(userId).url)
-            case _ => Ok(JsNull)
-          }
-        }.recover { case _: java.sql.SQLIntegrityConstraintViolationException => Conflict(JsonErrors.EmailAlreadySignedUp)}
+    JsonFormHelper.asyncJsonForm(jsonRequest) { emailPassword =>
+      val email = emailPassword._1
+      val password = emailPassword._2
+
+      userDAO.create(email, BCrypt.hashpw(password, BCrypt.gensalt())).flatMap { userId =>
+        mailerClient.send(Email("Поздравляем Вас с регистрацией", "Whipcake <noreply@whipcake.com>", Seq(email),
+          Some("Поздравляем Вас с успешной регистрацией в Whipcake!")))
+        usersApiTokenDAO.generateToken(request.appId, userId).map {
+          case (token, expiresAt) =>
+            Ok(Json.obj("token" -> token, "expiresAt" -> expiresAt)).withHeaders("Location" -> routes.UserController.get(userId).url)
+          case _ => Ok(JsNull)
+        }
+      }.recover {
+        case _: java.sql.SQLIntegrityConstraintViolationException => Conflict(JsonErrors.EmailAlreadySignedUp)
       }
-    } getOrElse Future.successful(BadRequest(JsonErrors.CannotCreateUser))
+    }
+
   }
 
   def update(userId: Int) = AuthAction.async { implicit request =>
-    import errorJsonBodies.JsonErrors
-
     Actions.filterOnlyObjectOwnerAllowed(userId) {
 
       val jsonUser = Form(
@@ -86,8 +91,7 @@ class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient
             Ok(jsonUser)
 
           }.recover {
-            //case e: java.sql.SQLIntegrityConstraintViolationException => // only for MySql, doesn't work for h2
-            case e: Exception =>
+            case e: java.sql.SQLIntegrityConstraintViolationException =>
               if (e.getMessage.toUpperCase.contains("LOGIN_UNIQUE"))
                 BadRequest(JsonErrors.LoginDuplication)
               else if (e.getMessage.toUpperCase.contains("EMAIL_UNIQUE"))

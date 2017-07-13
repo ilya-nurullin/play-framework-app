@@ -4,8 +4,9 @@ import javax.inject._
 
 import actions.Actions
 import errorJsonBodies.JsonErrors
+import helpers.JsonFormHelper
 import json.implicits.formats.DateJsonFormat
-import models.TaskDAO
+import models.{ProjectDAO, TaskDAO}
 import org.joda.time.DateTime
 import play.api.data.Forms._
 import play.api.data._
@@ -15,7 +16,7 @@ import play.api.mvc._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TaskController @Inject() (actions: Actions, taskDAO: TaskDAO) extends Controller {
+class TaskController @Inject() (actions: Actions, taskDAO: TaskDAO, projectDAO: ProjectDAO) extends Controller {
   import json.implicits.formats.TaskJsonFormat._
 
   def get(taskId: Long) = actions.AuthAction.async { request =>
@@ -28,7 +29,7 @@ class TaskController @Inject() (actions: Actions, taskDAO: TaskDAO) extends Cont
   }
 
   def getLatestTasks(startWith: Long = 0) = actions.AuthAction.async { request =>
-    taskDAO.getLastTasks(request.userId, startWith).map { tasksOpt =>
+    taskDAO.getLatestTasks(request.userId, startWith).map { tasksOpt =>
       Ok(Json.toJson(tasksOpt))
     }
   }
@@ -37,28 +38,29 @@ class TaskController @Inject() (actions: Actions, taskDAO: TaskDAO) extends Cont
     val jsonTask = Form(
       mapping(
         "title" -> nonEmptyText,
+        "projectId" -> longNumber,
         "description" -> optional(nonEmptyText),
         "deadline" -> optional(jodaDate(DateJsonFormat.format)),
         "importance" -> optional(number(0, 100)),
-        "complexity" -> optional(number(0, 100))
-      )(CreateTaskModel.apply)(CreateTaskModel.unapply)
+        "complexity" -> optional(number(0, 100)),
+        "isArchived" -> default(boolean, false)
+      )(TaskModel.apply)(TaskModel.unapply)
     )
 
-    jsonTask.bindFromRequest.fold(
-      hasError => {
-        val errors = hasError.errors.foldLeft(Map[String, String]()) { (m, e) => m + (e.key -> e.message) }
-        Future.successful(BadRequest(JsonErrors.BadData(Json.toJson(errors))))
-      },
-      task => {
-        taskDAO.createNewTask(request.userId, models.Task(0, task.title, task.description, task.deadline,
-          (request.body.asJson.get \ "data").asOpt[JsObject], task.importance, task.complexity)
-        ).flatMap { taskId =>
-          taskDAO.getById(taskId, request.userId).map{ taskOpt =>
-            Ok(Json.toJson(taskOpt))
+    JsonFormHelper.asyncJsonForm(jsonTask){ task =>
+      projectDAO.isProjectOwner(request.userId, task.projectId).flatMap { isOwner =>
+        if (isOwner)
+          taskDAO.createNewTask(request.userId, models.Task(0, task.title, task.projectId, task.description, task.deadline,
+            (request.body.asJson.get \ "data").asOpt[JsObject], task.importance, task.complexity)
+          ).flatMap { taskId =>
+            taskDAO.getById(taskId, request.userId).map { taskOpt =>
+              Ok(Json.toJson(taskOpt))
+            }
           }
-        }
+        else
+          Future.successful(Forbidden(JsonErrors.BadDataNonOwner("projectId")))
       }
-    )
+    }
   }
 
   def update(taskId: Long) = actions.AuthAction.async { implicit request =>
@@ -70,26 +72,28 @@ class TaskController @Inject() (actions: Actions, taskDAO: TaskDAO) extends Cont
         val jsonTask = Form(
           mapping(
             "title" -> nonEmptyText,
+            "projectId" -> longNumber,
             "description" -> optional(nonEmptyText),
             "deadline" -> optional(jodaDate(DateJsonFormat.format)),
             "importance" -> optional(number(0, 100)),
             "complexity" -> optional(number(0, 100)),
             "isArchived" -> boolean
-          )(UpdateTaskModel.apply)(UpdateTaskModel.unapply)
+          )(TaskModel.apply)(TaskModel.unapply)
         )
 
-        jsonTask.bindFromRequest.fold(
-          hasError => {
-            val errors = hasError.errors.foldLeft(Map[String, String]()) { (m, e) => m + (e.key -> e.message) }
-            Future.successful(BadRequest(JsonErrors.BadData(Json.toJson(errors))))
-          },
-          task => {
-            taskDAO.updateTask(taskId, task.title, task.description, task.deadline,
-              (request.body.asJson.get \ "data").asOpt[JsObject], task.importance, task.complexity, task.isArchived).map { updatedTask =>
-              Ok(Json.toJson(updatedTask))
-            }
+        JsonFormHelper.asyncJsonForm(jsonTask) { task =>
+          projectDAO.isProjectOwner(request.userId, task.projectId).flatMap { isOwner =>
+            if (isOwner)
+              taskDAO.updateTask(taskId, task.title, task.projectId, task.description, task.deadline,
+                (request.body.asJson.get \ "data").asOpt[JsObject], task.importance, task.complexity, task.isArchived).map {
+                updatedTask =>
+                  Ok(Json.toJson(updatedTask))
+              }
+            else
+              Future.successful(Forbidden(JsonErrors.BadDataNonOwner("projectId")))
           }
-        )
+        }
+
       }
     }
   }
@@ -109,9 +113,9 @@ class TaskController @Inject() (actions: Actions, taskDAO: TaskDAO) extends Cont
     }
   }
 
-  case class CreateTaskModel(title: String, description: Option[String], deadline: Option[DateTime],
+  case class CreateTaskModel(title: String, projectId: Long, description: Option[String], deadline: Option[DateTime],
                   importance: Option[Int], complexity: Option[Int])
 
-  case class UpdateTaskModel(title: String, description: Option[String], deadline: Option[DateTime],
-                  importance: Option[Int], complexity: Option[Int], isArchived: Boolean)
+  case class TaskModel(title: String, projectId: Long, description: Option[String], deadline: Option[DateTime],
+                       importance: Option[Int], complexity: Option[Int], isArchived: Boolean)
 }

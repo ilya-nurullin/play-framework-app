@@ -1,6 +1,7 @@
 package errorJsonBodies
 
 import actions.Actions
+import play.api.data.Form
 import play.api.libs.json.{JsObject, JsValue, Json}
 
 case class JsonError(error: String, data: Option[JsObject] = None)
@@ -10,9 +11,6 @@ object JsonErrors {
   private val appKeyHeaderName = Actions.AppKeyHeaderName.replace('-', '_').toLowerCase
   private val accessTokenHeaderName = Actions.AccessTokenHeaderName.replace('-', '_').toLowerCase
 
-  lazy val JsonExpected = Json.toJson(JsonError("json_expected"))
-  lazy val EmailAndPasswordExpected = Json.toJson(JsonError("email_and_password_expected"))
-  lazy val CannotCreateUser = Json.toJson(JsonError("cannot_create_user"))
   lazy val BadCredentials = Json.toJson(JsonError("bad_credentials"))
   lazy val EmailAlreadySignedUp = Json.toJson(JsonError("email_already_signed_up"))
 
@@ -31,7 +29,18 @@ object JsonErrors {
   lazy val LoginDuplication = Json.toJson(JsonError("login_duplication"))
   lazy val EmailDuplication = Json.toJson(JsonError("email_duplication"))
 
+  lazy val OAuthEmptyEmail = Json.toJson(JsonError("oauth_empty_email"))
+  lazy val OAuthNonEqualEmail = Json.toJson(JsonError("oauth_non_equal_emails"))
+  lazy val OAuthNetworkNotFound = Json.toJson(JsonError("oauth_network_not_found"))
+  lazy val OAuthNetworkNotAllowedByUser = Json.toJson(JsonError("oauth_network_not_allowed_by_user"))
+
   def BadData(errors: JsObject) = Json.toJson(JsonError("bad_data", Some(errors)))
   def BadData(errors: JsValue) = Json.toJson(JsonError("bad_data", Some(errors.asInstanceOf[JsObject])))
+  def BadDataNonOwner(fieldName: String) = BadData(Json.obj(fieldName -> "nonOwner"))
+
+  def FormWithErrorsToJson[T](formWithErrors: Form[T]) = {
+    val errors = formWithErrors.errors.foldLeft(Map[String, String]()) { (m, e) => m + (e.key -> e.message) }
+    JsonErrors.BadData(Json.toJson(errors))
+  }
 
 }

@@ -26,7 +26,6 @@ class AccessTokenFilterAction @Inject() (usersApiToken: UsersApiTokenDAO, apiApp
                 else
                   Future.successful(Results.Forbidden(JsonErrors.AccessTokenIsNotValid))
               case _ => throw new ClassCastException("AccessTokenFilterAction received no RequestWithAppIdAndKey request")
-              //case _ => Future.successful(Results.Forbidden(s"${Actions.AccessTokenHeaderName} is not valid"))
             }
           case None => Future.successful(Results.Forbidden(JsonErrors.AccessTokenIsNotValid))
          }

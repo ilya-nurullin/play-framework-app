@@ -54,6 +54,7 @@ class TaskControllerSpec  extends BaseSpec with AuthActionBehaviors with FutureT
       "Create new task" in {
         val newTaskJson = Json.obj(
           "title" -> "NewTask",
+          "projectId" -> 1,
           "description" -> "new Desc",
           "deadline" -> DateTime.now().toString(DateJsonFormat.format),
           "importance" -> 1,
@@ -68,10 +69,31 @@ class TaskControllerSpec  extends BaseSpec with AuthActionBehaviors with FutureT
         val jsonResponse = contentAsJson(createMethod)
         (jsonResponse \ "id").asOpt[Long].isDefined mustBe true
         (jsonResponse \ "title") mustBe (newTaskJson \ "title")
+        (jsonResponse \ "projectId") mustBe (newTaskJson \ "projectId")
+        (jsonResponse \ "description") mustBe (newTaskJson \ "description")
         (jsonResponse \ "deadline") mustBe (newTaskJson \ "deadline")
         (jsonResponse \ "importance") mustBe (newTaskJson \ "importance")
         (jsonResponse \ "complexity") mustBe (newTaskJson \ "complexity")
         (jsonResponse \ "data") mustBe (newTaskJson \ "data")
+      }
+
+      "Deny creation if projectId nonOnwer" in {
+        val newTaskJson = Json.obj(
+          "title" -> "NewTask",
+          "projectId" -> 2,
+          "description" -> "new Desc",
+          "deadline" -> DateTime.now().toString(DateJsonFormat.format),
+          "importance" -> 1,
+          "complexity" -> 6,
+          "data" -> Json.obj("tags" -> Json.arr(Seq("tag1", "tag2")))
+        )
+
+        val createMethod = controller.create().apply(fakeRequestWithRightAuthHeaders.withJsonBody(newTaskJson))
+
+        status(createMethod) mustBe FORBIDDEN
+
+        val jsonResponse = contentAsJson(createMethod)
+        (jsonResponse \ "data" \ "projectId").as[String] mustBe "nonOwner"
       }
     }
 
@@ -85,6 +107,7 @@ class TaskControllerSpec  extends BaseSpec with AuthActionBehaviors with FutureT
       "Update task" in {
         val newTaskJson = Json.obj(
           "title" -> "Updated NewTask",
+          "projectId" -> 1,
           "description" -> "Updated new Desc",
           "deadline" -> DateTime.now().toString(DateJsonFormat.format),
           "importance" -> 3,
@@ -99,10 +122,30 @@ class TaskControllerSpec  extends BaseSpec with AuthActionBehaviors with FutureT
         val jsonResponse = contentAsJson(updateMethod)
         (jsonResponse \ "id").as[Long] mustBe 3
         (jsonResponse \ "title") mustBe (newTaskJson \ "title")
+        (jsonResponse \ "projectId") mustBe (newTaskJson \ "projectId")
+        (jsonResponse \ "description") mustBe (newTaskJson \ "description")
         (jsonResponse \ "deadline") mustBe (newTaskJson \ "deadline")
         (jsonResponse \ "importance") mustBe (newTaskJson \ "importance")
         (jsonResponse \ "complexity") mustBe (newTaskJson \ "complexity")
         (jsonResponse \ "data") mustBe (newTaskJson \ "data")
+      }
+
+      "Deny updating task with nonOwn projectId" in {
+        val newTaskJson = Json.obj(
+          "title" -> "Updated NewTask",
+          "projectId" -> 2,
+          "description" -> "Updated new Desc",
+          "deadline" -> DateTime.now().toString(DateJsonFormat.format),
+          "importance" -> 3,
+          "complexity" -> 7,
+          "data" -> Json.obj("tags" -> Json.arr(Seq("tag3", "tag4")))
+        )
+
+        val updateMethod = controller.update(3).apply(fakeRequestWithRightAuthHeaders.withJsonBody(newTaskJson))
+
+        status(updateMethod) mustBe FORBIDDEN
+
+        (contentAsJson(updateMethod) \ "data" \ "projectId").as[String] mustBe "nonOwner"
       }
     }
 
@@ -115,6 +158,7 @@ class TaskControllerSpec  extends BaseSpec with AuthActionBehaviors with FutureT
       "Delete Task" in {
         val newTaskJson = Json.obj(
           "title" -> "NewTask",
+          "projectId" -> 1,
           "description" -> "new Desc",
           "deadline" -> DateTime.now().toString(DateJsonFormat.format),
           "importance" -> 1,

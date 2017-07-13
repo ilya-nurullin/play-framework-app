@@ -2,10 +2,14 @@ package controllers
 
 import errorJsonBodies.JsonErrors
 import models.UsersApiTokenDAO
+import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import test.{BaseSpec, FutureTest}
+import org.scalatest.time.SpanSugar._
+
+import scala.language.postfixOps
 
 trait AuthActionBehaviors extends BaseSpec with FutureTest {
 
@@ -19,13 +23,13 @@ trait AuthActionBehaviors extends BaseSpec with FutureTest {
 
       "Update token lifetime on query" in {
         val usersApiDAO = app.injector.instanceOf[UsersApiTokenDAO]
-
-        whenReady(usersApiDAO.getToken(rightAccessToken)) { tokenOpt =>
+        Thread.sleep(1000) // to be sure that time will be updated
+        whenReady(usersApiDAO.getToken(rightAccessToken), timeout(1 second)) { tokenOpt =>
           tokenOpt.isDefined mustBe true
           val expiresAt = tokenOpt.get.expiresAt
 
-          whenReady(act.apply(fakeRequestWithRightAuthHeaders)) { _ =>
-            whenReady(usersApiDAO.getToken(rightAccessToken)) { newTokenOpt =>
+          whenReady(act.apply(fakeRequestWithRightAuthHeaders), timeout(1 second)) { _ =>
+            whenReady(usersApiDAO.getToken(rightAccessToken), timeout(1 second)) { newTokenOpt =>
               newTokenOpt.isDefined mustBe true
               tokenOpt.get.eq(newTokenOpt.get) mustBe false
 
@@ -73,7 +77,8 @@ trait AuthActionBehaviors extends BaseSpec with FutureTest {
     }
   }
 
-  def filterOnlyObjectOwnerAllowed(allowAction: => Action[AnyContent], denyAction: => Action[AnyContent]) = {
+  def filterOnlyObjectOwnerAllowed(allowAction: => Action[AnyContent], denyAction: => Action[AnyContent],
+                                   denyActionBody: Option[JsValue] = None) = {
     "Allow access only for an object owner" should {
       "Allow access for object owner" in {
         val updateMethod = allowAction.apply(fakeRequestWithRightAuthHeaders)
@@ -81,7 +86,12 @@ trait AuthActionBehaviors extends BaseSpec with FutureTest {
         status(updateMethod) must not be FORBIDDEN
       }
       "Deny access for other accounts" in {
-        val updateMethod = denyAction.apply(fakeRequestWithRightAuthHeaders)
+        val updateMethod = denyAction.apply {
+          if (denyActionBody.isEmpty)
+            fakeRequestWithRightAuthHeaders
+          else
+            fakeRequestWithRightAuthHeaders.withJsonBody(denyActionBody.get)
+        }
 
         status(updateMethod) mustBe FORBIDDEN
         contentAsJson(updateMethod) must matchPattern {

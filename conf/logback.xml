@@ -36,6 +36,7 @@
   <logger name="slick.compiler" level="OFF" />
   <logger name="slick.compiler.QueryCompilerBenchmark" level="DEBUG" />
   <logger name="com.zaxxer.hikari.pool.HikariPool" level="OFF" />
+  <logger name="org.asynchttpclient.netty.channel.DefaultChannelPool" level="OFF" />
 
   <!--<logger name="slick.jdbc.StatementInvoker.result" level="INFO"/>-->
   <logger name="com.google.inject.internal.BytecodeGen" level="INFO"/>

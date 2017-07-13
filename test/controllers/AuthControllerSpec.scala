@@ -7,28 +7,30 @@ import play.api.test.Helpers._
 import test.{BaseSpec, FutureTest}
 
 class AuthControllerSpec extends BaseSpec with FutureTest {
-  "Auth controller POST" should {
-    val controller = app.injector.instanceOf[AuthController]
+  "Auth controller" should {
+    "POST" should {
+      val controller = app.injector.instanceOf[AuthController]
 
-    "Deny access without App-key header" in {
-      val authMethod = controller.emailAuth().apply(FakeRequest())
+      "Deny access without App-key header" in {
+        val authMethod = controller.emailAuth().apply(FakeRequest())
 
-      status(authMethod) mustBe UNAUTHORIZED
-      contentType(authMethod) mustBe Some("application/json")
-      contentAsString(authMethod) must include("{")
+        status(authMethod) mustBe UNAUTHORIZED
+        contentType(authMethod) mustBe Some("application/json")
+        contentAsString(authMethod) must include("{")
+      }
     }
-  }
 
-  "Auth controller DELETE" should {
-    val controller = app.injector.instanceOf[AuthController]
+    "DELETE" should {
+      val controller = app.injector.instanceOf[AuthController]
 
-    "Logout action" in {
-      val logoutMethod = controller.logout().apply(fakeRequestWithRightAuthHeaders)
-      status(logoutMethod) mustBe NO_CONTENT
-      contentAsString(logoutMethod) mustBe ""
+      "Logout action" in {
+        val logoutMethod = controller.logout().apply(fakeRequestWithRightAuthHeaders)
+        status(logoutMethod) mustBe NO_CONTENT
+        contentAsString(logoutMethod) mustBe ""
 
-      whenReady(app.injector.instanceOf[UsersApiTokenDAO].getToken(rightAccessToken)) { tokenOpt =>
-        tokenOpt.isEmpty mustBe true
+        whenReady(app.injector.instanceOf[UsersApiTokenDAO].getToken(rightAccessToken)) { tokenOpt =>
+          tokenOpt.isEmpty mustBe true
+        }
       }
     }
   }

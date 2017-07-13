@@ -9,6 +9,8 @@ import slick.jdbc.JdbcProfile
 import slick.jdbc.MySQLProfile.api._
 import slick.lifted.{TableQuery, Tag}
 import com.github.tototoshi.slick.MySQLJodaSupport._
+import play.api.libs.json.{JsArray, Json}
+import json.implicits.JsArrayMappedColumn
 
 import scala.concurrent.Future
 import scala.util.Random
@@ -18,9 +20,9 @@ case class User(id: Int, login: String, email: String, passHash: String, name: O
                 avatar: Option[String] = None, aboutMyself: Option[String] = None, dateOfBirth: Option[Date] = None,
                 sex: Option[Boolean] = None, createdAt: DateTime, updatedAt: DateTime,
                 cityId: Option[Int] = None, statuses: Option[String] = None, userRankId: Int,
-                premiumUntil: Option[DateTime] = None, isBanned: Boolean = false)
+                premiumUntil: Option[DateTime] = None, isBanned: Boolean = false, socNetworks: Option[JsArray] = None)
 
-class UsersTable(tag: Tag) extends Table[User](tag, "users") {
+class UsersTable(tag: Tag) extends Table[User](tag, "users") with JsArrayMappedColumn {
 
   def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
   def login = column[String]("login")
@@ -38,13 +40,14 @@ class UsersTable(tag: Tag) extends Table[User](tag, "users") {
   def userRankId = column[Int]("user_rank_id")
   def premiumUntil = column[Option[DateTime]]("premium_until")
   def isBanned = column[Boolean]("is_banned")
+  def socNetworks = column[Option[JsArray]]("soc_networks")
 
   def * = (id, login, email, passHash, name, avatar, aboutMyself, dateOfBirth, sex, createdAt, updatedAt, cityId, statuses,
-    userRankId, premiumUntil, isBanned) <> ( User.tupled, User.unapply )
+    userRankId, premiumUntil, isBanned, socNetworks) <> ( User.tupled, User.unapply )
 }
 
 @Singleton
-class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider) {
+class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider) extends JsArrayMappedColumn {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
@@ -59,16 +62,36 @@ class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider) {
     dbConfig.db.run(users.filter(_.email === email).take(1).result.headOption)
   }
 
+  def allowNetwork(name: String, userId: Int) = dbConfig.db.run {
+    users.filter(_.id === userId).map(_.socNetworks).result.head
+  }.map { socNetOpt =>
+    dbConfig.db.run {
+      users.filter(_.id === userId).map(_.socNetworks).update {
+        if (socNetOpt.isEmpty)
+          Some(Json.arr(name))
+        else
+          Some(socNetOpt.get.append(Json.parse(name)))
+      }
+    }
+  }
+
+  /**
+   * @return Created user ID
+   */
   def create(email: String, passHash: String): Future[Int] = {
     val login = Random.alphanumeric.take(20).mkString
+
     dbConfig.db.run {
-      (users returning users.map(_.id)) += User(0, login, email, passHash, userRankId = 1,
-        createdAt = DateTime.now(), updatedAt = DateTime.now())
-    }.map { id =>
-      dbConfig.db.run {
-        users.filter(_.login === login).map(_.login).update("id"+id)
-      }
-      id
+      users.filter(r => r.email === email).exists.result.flatMap { exists =>
+        if (!exists)
+          for {
+            id <- (users returning users.map(_.id)) += User(0, login, email, passHash, userRankId = 1,
+              createdAt = DateTime.now(), updatedAt = DateTime.now())
+            _ <- users.filter(_.login === login).map(_.login).update("id" + id)
+          } yield id
+        else
+          throw new java.sql.SQLIntegrityConstraintViolationException("Email duplication on creating a new user")
+      }.transactionally
     }
   }
 
