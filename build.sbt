@@ -5,18 +5,21 @@ version := "1.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.2"
 
 libraryDependencies ++= Seq(
-  filters, jdbc, ws,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" % Test,
-  "com.typesafe.play" %% "play-slick" % "2.1.0",
+  guice, filters, ws, jdbc, jodaForms,
+  //"com.typesafe.play" %% "play-json" % "2.6.0",
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0" % Test,
+  "com.typesafe.play" %% "play-slick" % "3.0.0",
   "mysql" % "mysql-connector-java" % "6.0.6",
   "com.github.tototoshi" %% "slick-joda-mapper" % "2.3.0",
-  "joda-time" % "joda-time" % "2.7",
-  "org.joda" % "joda-convert" % "1.7",
+  "joda-time" % "joda-time" % "2.9.9",
+  "com.typesafe.play" %% "play-json-joda" % "2.6.2",
+  "org.joda" % "joda-convert" % "1.8.2",
   "org.mindrot" % "jbcrypt" % "0.4",
-  "com.typesafe.play" %% "play-mailer" % "5.0.0"
+  "com.typesafe.play" %% "play-mailer" % "6.0.0",
+  "com.typesafe.play" %% "play-mailer-guice" % "6.0.0"
 )
 
 javaOptions in Test += "-Dlogger.file=test/resources/logback-test.xml"
@@ -30,7 +33,7 @@ publishArtifact in (Compile, packageDoc) := false
 testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-oCK")
 
 // Adds additional packages into Twirl
-//TwirlKeys.templateImports += "com.whipcake.api.controllers._"
+//TwirlKeys.templateImports += "com.whipcake.controllers._"
 
 // Adds additional packages into conf/routes
-// play.sbt.routes.RoutesKeys.routesImport += "com.whipcake.api.binders._"
+// play.sbt.routes.RoutesKeys.routesImport += "com.whipcake.binders._"

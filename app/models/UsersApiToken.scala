@@ -5,10 +5,11 @@ import javax.inject._
 import org.joda.time._
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
-import slick.lifted.{TableQuery, Tag}
+import slick.lifted.Tag
 import slick.jdbc.MySQLProfile.api._
 import com.github.tototoshi.slick.MySQLJodaSupport._
-import scala.concurrent.Future
+
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
 
@@ -24,7 +25,7 @@ class UsersApiTokenTable(tag: Tag) extends Table[UsersApiToken](tag, "users_has_
 }
 
 @Singleton
-class UsersApiTokenDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, config: play.api.Configuration) {
+class UsersApiTokenDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, config: play.api.Configuration)(implicit ec: ExecutionContext) {
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
   private val usersToken: TableQuery[UsersApiTokenTable] = TableQuery[UsersApiTokenTable]
   import dbConfig.profile.api._
@@ -46,8 +47,6 @@ class UsersApiTokenDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, confi
 
   def generateToken(appId: Int, userId: Int, round: Int = 1): Future[(String, DateTime)] = {
     if (round == 11) return Future.failed(new InterruptedException("Too many rounds for generate a token. Maybe primary or unique keys duplications"))
-
-    import scala.concurrent.ExecutionContext.Implicits.global
 
     val tokenLength = Random.alphanumeric.take(config.underlying.getInt("app.models.UsersApiToken.token.length")).mkString
     val expiresAt = DateTime.now().plusDays(config.underlying.getInt("app.models.UsersApiToken.token.lifetime"))

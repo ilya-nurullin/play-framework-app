@@ -13,12 +13,13 @@ import play.api.data._
 import play.api.libs.json._
 import play.api.mvc._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 
 @Singleton
-class AuthController @Inject() (userDAO: UserDAO, usersApiTokenDAO: UsersApiTokenDAO, actions: Actions, oauthExchanger: OAuthKeyExchanger) extends Controller {
+class AuthController @Inject() (userDAO: UserDAO, usersApiTokenDAO: UsersApiTokenDAO, actions: Actions,
+                                oauthExchanger: OAuthKeyExchanger)(implicit ec: ExecutionContext)
+    extends InjectedController {
 
   def emailAuth() = actions.AppIdFilterAction.async { implicit request =>
     import json.implicits.formats.DateJsonFormat._

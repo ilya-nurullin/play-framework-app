@@ -4,9 +4,10 @@ import javax.inject._
 
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
-import slick.lifted.{TableQuery, Tag}
+import slick.lifted.Tag
 import slick.jdbc.MySQLProfile.api._
-import scala.concurrent.ExecutionContext.Implicits.global
+
+import scala.concurrent.ExecutionContext
 
 case class ApiApp(id: Int, key: String, isBanned: Boolean)
 
@@ -19,7 +20,7 @@ class ApiAppTable(tag: Tag) extends Table[ApiApp](tag, "api_apps") {
 }
 
 @Singleton
-class ApiAppDAO @Inject()(dbConfigProvider: DatabaseConfigProvider) {
+class ApiAppDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
   private val apiApp: TableQuery[ApiAppTable] = TableQuery[ApiAppTable]
   import dbConfig.profile.api._

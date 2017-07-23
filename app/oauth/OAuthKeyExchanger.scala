@@ -6,7 +6,7 @@ import javax.inject._
 import models.{UserDAO, UsersApiTokenDAO}
 import org.joda.time.DateTime
 import play.api.libs.json.JsArray
-import play.api.libs.ws.WSClient
+import play.api.libs.ws._
 
 import scala.concurrent.Future
 
@@ -49,7 +49,7 @@ class OAuthKeyExchanger @Inject()(ws: WSClient, userDAO: UserDAO, usersApiTokenD
 
     def apply(credentials: OAuthCredentials): Future[ActionType] = {
       ws.url("https://graph.facebook.com/v2.9/me").
-        withQueryString("fields" -> "email", "access_token" -> credentials.token).get()
+        withQueryStringParameters("fields" -> "email", "access_token" -> credentials.token).get()
         .flatMap { response =>
           val jsResponse = response.json
           val profileEmail = (jsResponse \ "email").asOpt[String]

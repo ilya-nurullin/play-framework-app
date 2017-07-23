@@ -5,12 +5,11 @@ import javax.inject._
 import errorJsonBodies.JsonErrors
 import models.ApiAppDAO
 import play.api.mvc._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AppIdFilterAction @Inject() (apiAppDAO: ApiAppDAO) extends ActionBuilder[RequestWithAppIdAndKey] {
+class AppIdFilterAction @Inject() (apiAppDAO: ApiAppDAO, val parser: BodyParsers.Default)(implicit val executionContext: ExecutionContext)
+    extends ActionBuilder[RequestWithAppIdAndKey, AnyContent] {
 
   def invokeBlock[A](request: Request[A], block: (RequestWithAppIdAndKey[A]) ⇒ Future[Result]): Future[Result] = {
     request.headers.get(Actions.AppKeyHeaderName).map { appKey =>

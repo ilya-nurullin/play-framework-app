@@ -152,7 +152,7 @@ INSERT INTO `tasks` (`id`, `title`, `project_id`, `description`, `deadline`, `da
   (25, 'New Task', 1, 'desc', NULL, '{"amber": 4, "chick": "yes"}', 4, 3, '2017-06-23 11:43:43', '2017-07-07 11:18:31', 0),
   (26, 'New Task', 1, 'desc', NULL, '{"amber": 4, "chick": "yes"}', 4, 3, '2017-06-23 11:43:43', '2017-07-07 11:18:31', 0),
   (27, 'New Task', 1, 'desc', NULL, '{"amber": 4, "chick": "yes"}', 4, 3, '2017-06-23 11:43:43', '2017-07-07 11:18:31', 0),
-  (28, 'New Task', 1, 'desc', NULL, '{"amber": 4, "chick": "yes"}', 4, 3, '2017-06-23 11:43:43', '2017-07-07 11:18:31', 0);
+  (28, 'New Task', 2, 'desc', NULL, '{"amber": 4, "chick": "yes"}', 4, 3, '2017-06-23 11:43:43', '2017-07-07 11:18:31', 0);
 /*!40000 ALTER TABLE `tasks` ENABLE KEYS */;
 
 -- Дамп структуры для таблица whipcake.users

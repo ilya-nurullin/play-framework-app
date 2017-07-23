@@ -12,12 +12,12 @@ import play.api.libs.json._
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import json.implicits.formats.DateJsonFormat._
 
 @Singleton
-class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient: MailerClient, usersApiTokenDAO: UsersApiTokenDAO) extends Controller {
+class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient: MailerClient,
+                                usersApiTokenDAO: UsersApiTokenDAO)(implicit ec: ExecutionContext) extends InjectedController {
   val AuthAction = actions.AuthAction
   implicit val fullUserFormat = Json.format[FullUserJson]
 

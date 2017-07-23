@@ -1,4 +1,4 @@
-import javax.inject.Inject
+import javax.inject._
 
 import play.api.http.DefaultHttpFilters
 import play.filters.cors.CORSFilter
@@ -12,6 +12,7 @@ import play.filters.hosts.AllowedHostsFilter
  * https://www.playframework.com/documentation/latest/AllowedHostsFilter
  * https://www.playframework.com/documentation/latest/SecurityHeaders
  */
+@Singleton
 class Filters @Inject() (
   allowedHostsFilter: AllowedHostsFilter,
   securityHeadersFilter: SecurityHeadersFilter,

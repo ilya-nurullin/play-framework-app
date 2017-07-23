@@ -1,7 +1,7 @@
 package models
 
 import slick.jdbc.MySQLProfile.api._
-import slick.lifted.{TableQuery, Tag}
+import slick.lifted.Tag
 
 case class City(id: Int, name: String, countryId: Int)
 

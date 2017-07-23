@@ -8,7 +8,8 @@ import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 import slick.jdbc.MySQLProfile.api._
 import slick.lifted.{TableQuery, Tag}
-import scala.concurrent.ExecutionContext.Implicits.global
+
+import scala.concurrent.ExecutionContext
 
 case class Project(id: Long, title: String, description: Option[String], isArchived: Boolean, color: Option[String],
                    createdAt: Option[DateTime] = Some(DateTime.now()), updatedAt: Option[DateTime] = Some(DateTime.now()))
@@ -35,7 +36,7 @@ class UserHasProjectTable(tag: Tag) extends Table[UserHasProject](tag, "user_has
 }
 
 @Singleton
-class ProjectDAO @Inject() (dbConfigProvider: DatabaseConfigProvider) {
+class ProjectDAO @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
 
   val projects = TableQuery[ProjectTable]

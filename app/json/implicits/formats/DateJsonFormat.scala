@@ -4,6 +4,6 @@ import play.api.libs.json._
 
 object DateJsonFormat {
   val format = "yyyy-MM-dd'T'HH:mm:ssZ"
-  implicit val dateWrites = Writes.jodaDateWrites(format)
-  implicit val dateReads = Reads.jodaDateReads(format)
+  implicit val dateWrites = JodaWrites.jodaDateWrites(format)
+  implicit val dateReads = JodaReads.jodaDateReads(format)
 }

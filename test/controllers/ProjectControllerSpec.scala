@@ -36,6 +36,21 @@ class ProjectControllerSpec extends BaseSpec with AuthActionBehaviors {
       }
     }
 
+    "GET tasks in the project" should {
+      behave like authAction(controller.getTasks(1))
+
+      "Response with array of tasks belonging to the project" in {
+        val tasksMethod = controller.getTasks(1).apply(fakeRequestWithRightAuthHeaders)
+        status(tasksMethod) mustBe OK
+        val jsResponse = contentAsJson(tasksMethod)
+        jsResponse mustBe a [JsArray]
+        jsResponse.asInstanceOf[JsArray].value.exists(js => (js \ "id").as[Long] == 28) mustBe false
+
+        contentAsJson(controller.getTasks(2).apply(fakeRequestWithRightAuthHeaders)).asInstanceOf[JsArray].value.
+            exists(js => (js \ "id").as[Long] == 28) mustBe true
+      }
+    }
+
     "POST" should {
       behave like authAction(controller.create())
 

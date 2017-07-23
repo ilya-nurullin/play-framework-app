@@ -45,7 +45,7 @@ trait AuthActionBehaviors extends BaseSpec with FutureTest {
         val getMethod = act.apply(FakeRequest()
           .withHeaders("App-key" -> "2", "Access-token" -> rightAccessToken))
 
-        status(getMethod) mustBe FORBIDDEN
+        status(getMethod) mustBe UNAUTHORIZED
         contentType(getMethod) mustBe Some("application/json")
         contentAsJson(getMethod) mustBe JsonErrors.AccessTokenIsNotValid
       }
@@ -53,7 +53,7 @@ trait AuthActionBehaviors extends BaseSpec with FutureTest {
       "Response 403 FORBIDDEN if Access-token is not valid" in {
         val getMethod = act.apply(fakeRequestWith_RightAppKey_WrongAccessToken)
 
-        status(getMethod) mustBe FORBIDDEN
+        status(getMethod) mustBe UNAUTHORIZED
         contentType(getMethod) mustBe Some("application/json")
         contentAsJson(getMethod) mustBe JsonErrors.AccessTokenIsNotValid
       }

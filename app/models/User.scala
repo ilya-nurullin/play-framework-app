@@ -12,7 +12,7 @@ import com.github.tototoshi.slick.MySQLJodaSupport._
 import play.api.libs.json.{JsArray, Json}
 import json.implicits.JsArrayMappedColumn
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
 
@@ -47,8 +47,7 @@ class UsersTable(tag: Tag) extends Table[User](tag, "users") with JsArrayMappedC
 }
 
 @Singleton
-class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider) extends JsArrayMappedColumn {
-  import scala.concurrent.ExecutionContext.Implicits.global
+class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) extends JsArrayMappedColumn {
 
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
 

@@ -6,11 +6,11 @@ import errorJsonBodies.JsonErrors
 import models.{ApiAppDAO, UsersApiTokenDAO}
 import play.api.mvc._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AccessTokenFilterAction @Inject() (usersApiToken: UsersApiTokenDAO, apiAppDAO: ApiAppDAO) extends ActionBuilder[UserRequest] {
+class AccessTokenFilterAction @Inject() (usersApiToken: UsersApiTokenDAO, apiAppDAO: ApiAppDAO, val parser: BodyParsers.Default)(implicit val executionContext: ExecutionContext)
+    extends ActionBuilder[UserRequest, AnyContent] {
 
   def invokeBlock[A](request: Request[A], block: (UserRequest[A]) => Future[Result]): Future[Result] = {
     request.headers.get(Actions.AccessTokenHeaderName).flatMap { token =>
@@ -24,10 +24,10 @@ class AccessTokenFilterAction @Inject() (usersApiToken: UsersApiTokenDAO, apiApp
                   block(new UserRequest[A](usersToken.userId, usersToken.appId, appKey, request))
                 }
                 else
-                  Future.successful(Results.Forbidden(JsonErrors.AccessTokenIsNotValid))
+                  Future.successful(Results.Unauthorized(JsonErrors.AccessTokenIsNotValid))
               case _ => throw new ClassCastException("AccessTokenFilterAction received no RequestWithAppIdAndKey request")
             }
-          case None => Future.successful(Results.Forbidden(JsonErrors.AccessTokenIsNotValid))
+          case None => Future.successful(Results.Unauthorized(JsonErrors.AccessTokenIsNotValid))
          }
       }
     } getOrElse Future.successful(Results.Unauthorized(JsonErrors.NeedAccessTokenHeader))

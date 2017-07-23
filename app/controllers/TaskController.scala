@@ -13,10 +13,11 @@ import play.api.data._
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
+import play.api.data.JodaForms._
 
-class TaskController @Inject() (actions: Actions, taskDAO: TaskDAO, projectDAO: ProjectDAO) extends Controller {
+class TaskController @Inject() (actions: Actions, taskDAO: TaskDAO, projectDAO: ProjectDAO)(implicit ec: ExecutionContext)
+    extends InjectedController {
   import json.implicits.formats.TaskJsonFormat._
 
   def get(taskId: Long) = actions.AuthAction.async { request =>

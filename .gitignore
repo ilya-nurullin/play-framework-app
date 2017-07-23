@@ -1,10 +1,5 @@
 logs
 target
-gradle
-
-/gradlew
-/gradlew.bat
-/build.gradle
 
 /.idea
 /.idea_modules
