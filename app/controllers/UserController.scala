@@ -38,7 +38,7 @@ class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient
     val jsonRequest = Form(
       tuple(
         "email" -> email,
-        "password" -> nonEmptyText
+        "password" -> nonEmptyText(6)
       )
     )
 
