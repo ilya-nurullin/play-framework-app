@@ -34,6 +34,8 @@ object JsonErrors {
   lazy val OAuthNetworkNotFound = Json.toJson(JsonError("oauth_network_not_found"))
   lazy val OAuthNetworkNotAllowedByUser = Json.toJson(JsonError("oauth_network_not_allowed_by_user"))
 
+  lazy val WrongPassword = Json.toJson(JsonError("wrong_password"))
+
   def BadData(errors: JsObject) = Json.toJson(JsonError("bad_data", Some(errors)))
   def BadData(errors: JsValue) = Json.toJson(JsonError("bad_data", Some(errors.asInstanceOf[JsObject])))
   def BadDataNonOwner(fieldName: String) = BadData(Json.obj(fieldName -> "nonOwner"))

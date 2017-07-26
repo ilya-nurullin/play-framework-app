@@ -103,4 +103,8 @@ class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: E
     }
   }
 
+  def changePassword(userId: Int, newPasswordHash: String) = dbConfig.db.run {
+    users.filter(_.id === userId).map(_.passHash).update(newPasswordHash)
+  }
+
 }

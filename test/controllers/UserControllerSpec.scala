@@ -154,5 +154,42 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
         contentAsJson(updateMethodLoginDuplication) mustBe JsonErrors.LoginDuplication
       }
     }
+
+    "Change password" should {
+      val controller = app.injector.instanceOf[UserController]
+
+      behave like authAction(controller.changePassword(1))
+
+      behave like filterOnlyObjectOwnerAllowed(controller.changePassword(1), controller.changePassword(2))
+
+      "Change password" in {
+        val jsonRequest = Json.obj(
+          "oldPassword" -> "testPassword",
+          "newPassword" -> "newPass"
+        )
+        val changeMethod = controller.changePassword(1).apply(fakeRequestWithRightAuthHeaders.withJsonBody(jsonRequest))
+
+        status(changeMethod) mustBe NO_CONTENT
+
+        whenReady(app.injector.instanceOf[UserDAO].getById(1)) { userOpt =>
+          userOpt.isDefined mustBe true
+          val user = userOpt.get
+
+          import org.mindrot.jbcrypt.BCrypt
+
+          BCrypt.checkpw("newPass", user.passHash) mustBe true
+        }
+      }
+
+      "Deny change password if old password is wrong" in {
+        val jsonRequest = Json.obj(
+          "oldPassword" -> "testPassword",
+          "newPassword" -> "newPass"
+        )
+        val changeMethod = controller.changePassword(1).apply(fakeRequestWithRightAuthHeaders.withJsonBody(jsonRequest))
+
+        status(changeMethod) mustBe FORBIDDEN
+      }
+    }
   }
 }

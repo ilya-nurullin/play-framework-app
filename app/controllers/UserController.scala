@@ -11,6 +11,7 @@ import play.api.data._
 import play.api.libs.json._
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc._
+import org.mindrot.jbcrypt.BCrypt
 
 import scala.concurrent.{ExecutionContext, Future}
 import json.implicits.formats.DateJsonFormat._
@@ -33,8 +34,6 @@ class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient
   }
 
   def create() = actions.AppIdFilterAction.async { implicit request =>
-    import org.mindrot.jbcrypt.BCrypt
-
     val jsonRequest = Form(
       tuple(
         "email" -> email,
@@ -102,6 +101,30 @@ class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient
         }
       )
 
+    }
+  }
+
+  def changePassword(userId: Int) = actions.AuthAction.async { implicit request =>
+    Actions.filterOnlyObjectOwnerAllowed(userId) {
+      val jsonRequest = Form(
+        tuple(
+          "oldPassword" -> nonEmptyText(6),
+          "newPassword" -> nonEmptyText(6)
+        )
+      )
+
+      JsonFormHelper.asyncJsonForm(jsonRequest) { passTuple =>
+        userDAO.getById(userId).flatMap { userOpt =>
+          val user = userOpt.get
+          if (BCrypt.checkpw(passTuple._1, user.passHash)) {
+            userDAO.changePassword(userId, BCrypt.hashpw(passTuple._2, BCrypt.gensalt())).map { _ =>
+              NoContent
+            }
+          }
+          else
+            Future.successful(Forbidden(JsonErrors.WrongPassword))
+        }
+      }
     }
   }
 
