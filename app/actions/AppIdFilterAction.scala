@@ -11,7 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class AppIdFilterAction @Inject() (apiAppDAO: ApiAppDAO, val parser: BodyParsers.Default)(implicit val executionContext: ExecutionContext)
     extends ActionBuilder[RequestWithAppIdAndKey, AnyContent] {
 
-  def invokeBlock[A](request: Request[A], block: (RequestWithAppIdAndKey[A]) ⇒ Future[Result]): Future[Result] = {
+  def invokeBlock[A](request: Request[A], block: (RequestWithAppIdAndKey[A]) => Future[Result]): Future[Result] = {
     request.headers.get(Actions.AppKeyHeaderName).map { appKey =>
       apiAppDAO.getApp(appKey).flatMap {
         case Some(app) =>

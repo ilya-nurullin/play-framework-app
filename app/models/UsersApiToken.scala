@@ -15,7 +15,7 @@ import scala.util.Random
 
 case class UsersApiToken(token: String, userId: Int, appId: Int, expiresAt: DateTime)
 
-class UsersApiTokenTable(tag: Tag) extends Table[UsersApiToken](tag, "users_has_api_tokens") {
+class UsersApiTokenTable(tag: Tag) extends Table[UsersApiToken](tag, "user_has_api_token") {
   def token = column[String]("token", O.PrimaryKey)
   def userId = column[Int]("user_id")
   def appId = column[Int]("app_id")

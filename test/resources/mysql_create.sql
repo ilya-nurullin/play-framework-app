@@ -192,8 +192,8 @@ INSERT INTO `users` (`id`, `login`, `email`, `pass_hash`, `name`, `avatar`, `abo
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 
 -- Дамп структуры для таблица whipcake.users_has_api_tokens
-DROP TABLE IF EXISTS `users_has_api_tokens`;
-CREATE TABLE IF NOT EXISTS `users_has_api_tokens` (
+DROP TABLE IF EXISTS `user_has_api_token`;
+CREATE TABLE IF NOT EXISTS `user_has_api_token` (
   `token` varchar(30) NOT NULL,
   `user_id` int(10) unsigned NOT NULL,
   `app_id` int(11) unsigned NOT NULL,
@@ -207,12 +207,12 @@ CREATE TABLE IF NOT EXISTS `users_has_api_tokens` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Дамп данных таблицы whipcake.users_has_api_tokens: ~4 rows (приблизительно)
-/*!40000 ALTER TABLE `users_has_api_tokens` DISABLE KEYS */;
-INSERT INTO `users_has_api_tokens` (`token`, `user_id`, `app_id`, `expires_at`) VALUES
+/*!40000 ALTER TABLE `user_has_api_token` DISABLE KEYS */;
+INSERT INTO `user_has_api_token` (`token`, `user_id`, `app_id`, `expires_at`) VALUES
   ('2', 2, 1, '2017-07-24 11:16:11'),
   ('ft1IjFotneQESvMktZqVrQ4Xas0weJ', 1, 2, ADDDATE(NOW(), INTERVAL 17 DAY)),
   ('PjdSyBX62WSq8b1IEOEFMfsjBYZcpP', 1, 1, ADDDATE(NOW(), INTERVAL 17 DAY));
-/*!40000 ALTER TABLE `users_has_api_tokens` ENABLE KEYS */;
+/*!40000 ALTER TABLE `user_has_api_token` ENABLE KEYS */;
 
 -- Дамп структуры для таблица whipcake.user_has_project
 DROP TABLE IF EXISTS `user_has_project`;
