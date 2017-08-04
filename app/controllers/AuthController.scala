@@ -17,8 +17,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 
 @Singleton
-class AuthController @Inject() (userDAO: UserDAO, usersApiTokenDAO: UsersApiTokenDAO, actions: Actions,
-                                oauthExchanger: OAuthKeyExchanger)(implicit ec: ExecutionContext)
+class AuthController @Inject() (userDAO: UserDAO, usersApiTokenDAO: UsersApiTokenDAO, actions: Actions)(implicit ec: ExecutionContext)
     extends InjectedController {
 
   def emailAuth() = actions.AppIdFilterAction.async { implicit request =>
@@ -48,28 +47,6 @@ class AuthController @Inject() (userDAO: UserDAO, usersApiTokenDAO: UsersApiToke
           else
             Future.successful(BadRequest(JsonErrors.BadCredentials))
         } getOrElse Future.successful(BadRequest(JsonErrors.BadCredentials))
-      }
-    }
-  }
-
-  def oauth(network: String) = actions.AppIdFilterAction.async { implicit request =>
-    val jsonRequest = Form(
-      tuple(
-        "email" -> email,
-        "token" -> nonEmptyText
-      )
-    )
-
-    JsonFormHelper.asyncJsonForm(jsonRequest) { json =>
-      oauthExchanger.exchangeToken(network, oauthExchanger.OAuthCredentials(json._1, json._2), request.appId).map {
-        oauthResult =>
-          Ok(Json.obj("token" -> oauthResult.token, "expiresAt" -> oauthResult.expiresAt,
-            "actionType" -> oauthResult.actionType))
-      }.recover {
-        case _: OAuthEmptyEmailException => BadRequest(JsonErrors.OAuthEmptyEmail)
-        case _: OAuthNonEqualEmailException => BadRequest(JsonErrors.OAuthNonEqualEmail)
-        case _: OAuthNetworkNotFoundException => BadRequest(JsonErrors.OAuthNetworkNotFound)
-        case _: OAuthNetworkNotAllowedByUserException => BadRequest(JsonErrors.OAuthNetworkNotAllowedByUser)
       }
     }
   }

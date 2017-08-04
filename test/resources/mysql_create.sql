@@ -292,6 +292,17 @@ INSERT INTO `user_ranks` (`id`, `name`) VALUES
   (1, 'testRank');
 /*!40000 ALTER TABLE `user_ranks` ENABLE KEYS */;
 
+DROP TABLE IF EXISTS `user_has_social_network`;
+CREATE TABLE `user_has_social_network` (
+  `user_id` INT(10) UNSIGNED NOT NULL,
+  `network_name` VARCHAR(45) NOT NULL,
+  `user_network_id` BIGINT(19) UNSIGNED NOT NULL,
+  `email` VARCHAR(100) NULL DEFAULT NULL,
+  PRIMARY KEY (`user_id`, `network_name`),
+  CONSTRAINT `fk_user_has_social_network_users1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
+) COLLATE='utf8_general_ci' ENGINE=InnoDB;
+
+
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

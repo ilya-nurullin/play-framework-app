@@ -29,10 +29,9 @@ object JsonErrors {
   lazy val LoginDuplication = Json.toJson(JsonError("login_duplication"))
   lazy val EmailDuplication = Json.toJson(JsonError("email_duplication"))
 
-  lazy val OAuthEmptyEmail = Json.toJson(JsonError("oauth_empty_email"))
-  lazy val OAuthNonEqualEmail = Json.toJson(JsonError("oauth_non_equal_emails"))
-  lazy val OAuthNetworkNotFound = Json.toJson(JsonError("oauth_network_not_found"))
-  lazy val OAuthNetworkNotAllowedByUser = Json.toJson(JsonError("oauth_network_not_allowed_by_user"))
+  lazy val OAuthEmptyEmail = Json.toJson(JsonError("oauth_empty_email")) // for registration
+  lazy val OAuthFailed = Json.toJson(JsonError("oauth_failed"))
+  lazy val OAuthAlreadySignedUp = Json.toJson(JsonError("oauth_already_signed_up"))
 
   lazy val WrongPassword = Json.toJson(JsonError("wrong_password"))
 

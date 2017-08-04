@@ -7,8 +7,10 @@
 GET       /                             controllers.HomeController.index
 
 POST      /auth/email                   controllers.AuthController.emailAuth
-POST      /auth/oauth                   controllers.AuthController.oauth(network: String)
+POST      /auth/oauth                   controllers.OAuthController.auth(network: String)
 DELETE    /auth                         controllers.AuthController.logout
+
+POST      /reg/oauth                    controllers.OAuthController.registration(network: String)
 
 GET       /users/:id                    controllers.UserController.get(id: Int)
 POST      /users                        controllers.UserController.create
