@@ -49,8 +49,8 @@ class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient
         mailerClient.send(Email("Поздравляем Вас с регистрацией", "Whipcake <noreply@whipcake.com>", Seq(email),
           Some("Поздравляем Вас с успешной регистрацией в Whipcake!")))
         usersApiTokenDAO.generateToken(request.appId, userId).map {
-          case (token, expiresAt) =>
-            Ok(Json.obj("token" -> token, "expiresAt" -> expiresAt)).withHeaders("Location" -> routes.UserController.get(userId).url)
+          case (token, _) =>
+            Ok(Json.obj("token" -> token)).withHeaders("Location" -> routes.UserController.get(userId).url)
           case _ => Ok(JsNull)
         }
       }.recover {
