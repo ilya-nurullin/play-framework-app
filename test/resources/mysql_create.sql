@@ -303,6 +303,19 @@ CREATE TABLE `user_has_social_network` (
 ) COLLATE='utf8_general_ci' ENGINE=InnoDB;
 
 
+DROP TABLE IF EXISTS `user_has_last_sync_id`;
+CREATE TABLE `user_has_last_sync_id` (
+  `user_id` INT(10) UNSIGNED NOT NULL,
+  `app_id` INT(11) UNSIGNED NOT NULL,
+  `last_sync_id` BIGINT(19) UNSIGNED NULL DEFAULT '0',
+  PRIMARY KEY (`user_id`, `app_id`),
+  INDEX `fk_users_has_api_apps_users2_idx` (`user_id`),
+  INDEX `fk_users_has_api_apps_api_apps1_idx` (`app_id`),
+  CONSTRAINT `fk_users_has_api_apps_api_apps1` FOREIGN KEY (`app_id`) REFERENCES `api_apps` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT `fk_users_has_api_apps_users2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
+) COLLATE='utf8_general_ci' ENGINE=InnoDB;
+
+
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

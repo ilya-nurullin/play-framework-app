@@ -6,17 +6,18 @@ import models.{Project, ProjectDAO, TaskDAO}
 import play.api.mvc._
 import actions.Actions
 import errorJsonBodies.JsonErrors
-import helpers.JsonFormHelper
+import helpers.{JsonFormHelper, LastSyncIdHelper}
 import play.api.data.Forms._
 import play.api.data._
 import json.implicits.formats.ProjectJsonFormat._
 import json.implicits.formats.TaskJsonFormat._
 import play.api.libs.json.Json
 
-import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ProjectController @Inject() (actions: Actions, projectDAO: ProjectDAO, taskDAO: TaskDAO)(implicit ec: ExecutionContext) extends InjectedController {
+class ProjectController @Inject() (actions: Actions, projectDAO: ProjectDAO, taskDAO: TaskDAO,
+                                   lastSyncIdHelper: LastSyncIdHelper)(implicit ec: ExecutionContext) extends InjectedController {
 
   def get(projectId: Long) = actions.AuthAction.async { implicit request =>
     projectDAO.getProjectById(request.userId, projectId).map { projectOpt =>
@@ -40,21 +41,24 @@ class ProjectController @Inject() (actions: Actions, projectDAO: ProjectDAO, tas
     }
   }
 
-  def create() = actions.AuthAction.async { implicit request =>
-    val jsonRequest = Form(
-      mapping(
-        "title" -> nonEmptyText,
-        "description" -> optional(nonEmptyText),
-        "isArchived" -> boolean,
-        "color" -> optional(nonEmptyText(6,6))
-      )(JsonProject.apply)(JsonProject.unapply)
-    )
+  def create(lastSyncId: Option[Long] = None) = actions.AuthAction.async { implicit request =>
+    lastSyncIdHelper.checkSyncId(lastSyncId) {
 
-    JsonFormHelper.asyncJsonForm(jsonRequest) { json =>
-      projectDAO.createNewProject(request.userId, Project(0l, json.title, json.description, json.isArchived, json.color)
-      ).flatMap { projectId =>
-        projectDAO.getProjectById(request.userId, projectId).map { projectOpt =>
+      val jsonRequest = Form(
+        mapping(
+          "title" -> nonEmptyText,
+          "description" -> optional(nonEmptyText),
+          "isArchived" -> boolean,
+          "color" -> optional(nonEmptyText(6, 6))
+        )(JsonProject.apply)(JsonProject.unapply)
+      )
+
+      JsonFormHelper.asyncJsonForm(jsonRequest) { json =>
+        projectDAO.createNewProject(request.userId, Project(0l, json.title, json.description, json.isArchived, json.color)
+        ).flatMap { projectId =>
+          projectDAO.getProjectById(request.userId, projectId).map { projectOpt =>
             Ok(Json.toJson(projectOpt))
+          }
         }
       }
     }

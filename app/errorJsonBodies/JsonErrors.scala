@@ -35,6 +35,8 @@ object JsonErrors {
 
   lazy val WrongPassword = Json.toJson(JsonError("wrong_password"))
 
+  lazy val AlreadySynchronized = Json.toJson(JsonError("already_synchronized"))
+
   def BadData(errors: JsObject) = Json.toJson(JsonError("bad_data", Some(errors)))
   def BadData(errors: JsValue) = Json.toJson(JsonError("bad_data", Some(errors.asInstanceOf[JsObject])))
   def BadDataNonOwner(fieldName: String) = BadData(Json.obj(fieldName -> "nonOwner"))

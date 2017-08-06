@@ -4,7 +4,7 @@ import javax.inject._
 
 import actions.Actions
 import errorJsonBodies.JsonErrors
-import helpers.JsonFormHelper
+import helpers.{JsonFormHelper, LastSyncIdHelper}
 import json.implicits.formats.DateJsonFormat
 import models.{ProjectDAO, TaskDAO}
 import org.joda.time.DateTime
@@ -16,7 +16,9 @@ import play.api.mvc._
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.data.JodaForms._
 
-class TaskController @Inject() (actions: Actions, taskDAO: TaskDAO, projectDAO: ProjectDAO)(implicit ec: ExecutionContext)
+@Singleton
+class TaskController @Inject()(actions: Actions, taskDAO: TaskDAO, projectDAO: ProjectDAO,
+                               lastSyncIdHelper: LastSyncIdHelper)(implicit ec: ExecutionContext)
     extends InjectedController {
   import json.implicits.formats.TaskJsonFormat._
 
@@ -35,31 +37,34 @@ class TaskController @Inject() (actions: Actions, taskDAO: TaskDAO, projectDAO: 
     }
   }
 
-  def create() = actions.AuthAction.async { implicit request =>
-    val jsonTask = Form(
-      mapping(
-        "title" -> nonEmptyText,
-        "projectId" -> longNumber,
-        "description" -> optional(nonEmptyText),
-        "deadline" -> optional(jodaDate(DateJsonFormat.format)),
-        "importance" -> optional(number(0, 100)),
-        "complexity" -> optional(number(0, 100)),
-        "isArchived" -> default(boolean, false)
-      )(TaskModel.apply)(TaskModel.unapply)
-    )
+  def create(lastSyncId: Option[Long] = None) = actions.AuthAction.async { implicit request =>
+    lastSyncIdHelper.checkSyncId(lastSyncId) {
 
-    JsonFormHelper.asyncJsonForm(jsonTask){ task =>
-      projectDAO.isProjectOwner(request.userId, task.projectId).flatMap { isOwner =>
-        if (isOwner)
-          taskDAO.createNewTask(request.userId, models.Task(0, task.title, task.projectId, task.description, task.deadline,
-            (request.body.asJson.get \ "data").asOpt[JsObject], task.importance, task.complexity)
-          ).flatMap { taskId =>
-            taskDAO.getById(taskId, request.userId).map { taskOpt =>
-              Ok(Json.toJson(taskOpt))
+      val jsonTask = Form(
+        mapping(
+          "title" -> nonEmptyText,
+          "projectId" -> longNumber,
+          "description" -> optional(nonEmptyText),
+          "deadline" -> optional(jodaDate(DateJsonFormat.format)),
+          "importance" -> optional(number(0, 100)),
+          "complexity" -> optional(number(0, 100)),
+          "isArchived" -> default(boolean, false)
+        )(TaskModel.apply)(TaskModel.unapply)
+      )
+
+      JsonFormHelper.asyncJsonForm(jsonTask) { task =>
+        projectDAO.isProjectOwner(request.userId, task.projectId).flatMap { isOwner =>
+          if (isOwner)
+            taskDAO.createNewTask(request.userId, models.Task(0, task.title, task.projectId, task.description, task.deadline,
+              (request.body.asJson.get \ "data").asOpt[JsObject], task.importance, task.complexity)
+            ).flatMap { taskId =>
+              taskDAO.getById(taskId, request.userId).map { taskOpt =>
+                Ok(Json.toJson(taskOpt))
+              }
             }
-          }
-        else
-          Future.successful(Forbidden(JsonErrors.BadDataNonOwner("projectId")))
+          else
+            Future.successful(Forbidden(JsonErrors.BadDataNonOwner("projectId")))
+        }
       }
     }
   }
