@@ -30,7 +30,7 @@ class LastSyncIdHelper @Inject() (lastSyncIdDAO: LastSyncIdDAO)(implicit ec: Exe
           }
         }
       }
-    ) getOrElse Future.successful(Conflict(JsonErrors.AlreadySynchronized))
+    ) getOrElse block
   }
 
 }
