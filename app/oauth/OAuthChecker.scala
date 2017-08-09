@@ -26,25 +26,35 @@ class OAuthChecker @Inject()(ws: WSClient, userDAO: UserDAO, usersApiTokenDAO: U
 
   private object Facebook {
     val socName = "facebook"
+    val appId = "1934144683466884"
 
     def apply(credentials: OAuthCredentials): Future[OAuthResult] = {
-      ws.url("https://graph.facebook.com/v2.9/me")
-          .withQueryStringParameters("fields" -> "email", "access_token" -> credentials.token).get()
-          .map { response =>
-            val jsResponse = response.json
-            val userNetworkId = (jsResponse \ "id").asOpt[String].map(_.toLong)
-            val email = (jsResponse \ "email").asOpt[String]
+      ws.url("https://graph.facebook.com/debug_token").withQueryStringParameters("input_token" -> credentials.token,
+        "access_token" -> "***REMOVED***").get().flatMap { appCheckResponse =>
 
-            userNetworkId
-                .filter(uId => uId == credentials.userNetworkId)
-                .map(uId => OAuthSuccess(uId, credentials.token, email))
-                .getOrElse(OAuthFailed)
-          }
+        val jsResponse = appCheckResponse.json
+        val appIdOpt = (jsResponse \ "data" \ "app_id").asOpt[String].filter(_ == appId)
+        val isTokenValidOpt = (jsResponse \ "data" \ "is_valid").asOpt[Boolean].filter(_ == true)
+
+        if (appIdOpt.isEmpty || isTokenValidOpt.isEmpty)
+          Future.successful(OAuthFailed)
+        else
+          ws.url("https://graph.facebook.com/v2.10/me")
+            .withQueryStringParameters("fields" -> "email", "access_token" -> credentials.token).get()
+            .map { response =>
+              val jsResponse = response.json
+              val userNetworkId = (jsResponse \ "id").asOpt[String].map(_.toLong)
+              val email = (jsResponse \ "email").asOpt[String]
+
+              userNetworkId
+                  .filter(uId => uId == credentials.userNetworkId)
+                  .map(uId => OAuthSuccess(uId, credentials.token, email))
+                  .getOrElse(OAuthFailed)
+            }
+      }
     }
   }
 }
 
 class OAuthEmptyEmailException extends Exception
-class OAuthNonEqualEmailException extends Exception
 class OAuthNetworkNotFoundException extends Exception
-class OAuthNetworkNotAllowedByUserException extends Exception
