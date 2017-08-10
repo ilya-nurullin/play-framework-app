@@ -12,20 +12,22 @@ DELETE    /auth                         controllers.AuthController.logout
 
 POST      /reg/oauth                    controllers.OAuthController.registration(network: String)
 
+GET       /last_sync_id                 controllers.SyncController.lastSyncId
+
 GET       /users/:id                    controllers.UserController.get(id: Int)
 POST      /users                        controllers.UserController.create
 PUT       /users/:id                    controllers.UserController.update(id: Int)
 PUT       /users/:id/password           controllers.UserController.changePassword(id: Int)
 
 GET       /tasks                        controllers.TaskController.getLatestTasks(start_with: Long ?= 0)
-POST      /tasks                        controllers.TaskController.create(lastSyncId: Option[Long])
+POST      /tasks                        controllers.TaskController.create(syncId: Option[Long])
 GET       /tasks/:taskId                controllers.TaskController.get(taskId: Long)
 PUT       /tasks/:taskId                controllers.TaskController.update(taskId: Long)
 DELETE    /tasks/:taskId                controllers.TaskController.delete(taskId: Long)
 
 GET       /projects                     controllers.ProjectController.getLatestProjects(start_with: Long ?= 0)
 GET       /projects/:projectId/tasks    controllers.ProjectController.getTasks(projectId: Long, start_with: Long ?= 0)
-POST      /projects                     controllers.ProjectController.create(lastSyncId: Option[Long])
+POST      /projects                     controllers.ProjectController.create(syncId: Option[Long])
 GET       /projects/:projectId          controllers.ProjectController.get(projectId: Long)
 PUT       /projects/:projectId          controllers.ProjectController.update(projectId: Long)
 DELETE    /projects/:projectId          controllers.ProjectController.delete(projectId: Long)

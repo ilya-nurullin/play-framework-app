@@ -37,8 +37,8 @@ class TaskController @Inject()(actions: Actions, taskDAO: TaskDAO, projectDAO: P
     }
   }
 
-  def create(lastSyncId: Option[Long] = None) = actions.AuthAction.async { implicit request =>
-    lastSyncIdHelper.checkSyncId(lastSyncId) {
+  def create(syncId: Option[Long] = None) = actions.AuthAction.async { implicit request =>
+    lastSyncIdHelper.checkSyncId(syncId) {
 
       val jsonTask = Form(
         mapping(
