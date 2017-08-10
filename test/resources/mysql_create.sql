@@ -296,7 +296,7 @@ DROP TABLE IF EXISTS `user_has_social_network`;
 CREATE TABLE `user_has_social_network` (
   `user_id` INT(10) UNSIGNED NOT NULL,
   `network_name` VARCHAR(45) NOT NULL,
-  `user_network_id` BIGINT(19) UNSIGNED NOT NULL,
+  `user_network_id` VARCHAR(45) NOT NULL,
   `email` VARCHAR(100) NULL DEFAULT NULL,
   PRIMARY KEY (`user_id`, `network_name`),
   CONSTRAINT `fk_user_has_social_network_users1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
