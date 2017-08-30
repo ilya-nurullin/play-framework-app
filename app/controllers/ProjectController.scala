@@ -77,12 +77,10 @@ class ProjectController @Inject() (actions: Actions, projectDAO: ProjectDAO, tas
     JsonFormHelper.asyncJsonForm(jsonRequest) { json =>
       projectDAO.isProjectOwner(request.userId, projectId).flatMap { isOwner =>
         if (isOwner)
-          projectDAO.updateProject(request.userId, json.title, json.description, json.isArchived, json.color
-          ).flatMap { projectId =>
-            projectDAO.getProjectById(request.userId, projectId).map { projectOpt =>
-              Ok(Json.toJson(projectOpt))
-            }
-          }
+          for {
+            _ <- projectDAO.updateProject(projectId, json.title, json.description, json.isArchived, json.color)
+            projectOpt <- projectDAO.getProjectById(request.userId, projectId)
+          } yield Ok(Json.toJson(projectOpt))
         else
           Future.successful(Forbidden(JsonErrors.ChangingSomeoneElsesObject))
       }

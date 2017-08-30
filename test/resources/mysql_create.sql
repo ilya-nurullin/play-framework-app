@@ -100,7 +100,9 @@ CREATE TABLE IF NOT EXISTS `projects` (
 /*!40000 ALTER TABLE `projects` DISABLE KEYS */;
 INSERT INTO `projects` (`id`, `title`, `description`, `created_at`, `updated_at`, `is_archived`, `color`) VALUES
   (1, 'Тестовый преокт', NULL, '2017-07-07 11:17:12', '2017-07-07 11:17:12', 0, NULL),
-  (2, 'Второй тестовый преокт', NULL, '2017-07-07 11:17:12', '2017-07-07 11:17:12', 0, NULL);
+  (2, 'Второй тестовый преокт', NULL, '2017-07-07 11:17:12', '2017-07-07 11:17:12', 0, NULL),
+  (3, 'Проект3', NULL, '2017-08-30 12:15:03', '2017-08-30 12:15:03', 0, NULL);
+
 /*!40000 ALTER TABLE `projects` ENABLE KEYS */;
 
 -- Дамп структуры для таблица whipcake.tasks
@@ -230,6 +232,7 @@ CREATE TABLE IF NOT EXISTS `user_has_project` (
 /*!40000 ALTER TABLE `user_has_project` DISABLE KEYS */;
 INSERT INTO `user_has_project` (`user_id`, `project_id`) VALUES
   (1, 1),
+  (1, 3),
   (2, 2);
 /*!40000 ALTER TABLE `user_has_project` ENABLE KEYS */;
 

@@ -102,6 +102,19 @@ class ProjectControllerSpec extends BaseSpec with AuthActionBehaviors {
         (jsonResponse \ "description") mustBe (jsonRequest \ "description")
         (jsonResponse \ "isArchived") mustBe (jsonRequest \ "isArchived")
         (jsonResponse \ "color") mustBe (jsonRequest \ "color")
+
+        val createMethod2 = controller.update(3).apply(fakeRequestWithRightAuthHeaders.withJsonBody(jsonRequest))
+        status(createMethod2) mustBe OK
+
+        val jsonResponse2 = contentAsJson(createMethod2)
+
+        (jsonResponse2 \ "id").asOpt[Long].isDefined mustBe true
+        (jsonResponse2 \ "createdAt").asOpt[DateTime].isDefined mustBe true
+        (jsonResponse2 \ "updatedAt").asOpt[DateTime].isDefined mustBe true
+        (jsonResponse2 \ "title") mustBe (jsonRequest \ "title")
+        (jsonResponse2 \ "description") mustBe (jsonRequest \ "description")
+        (jsonResponse2 \ "isArchived") mustBe (jsonRequest \ "isArchived")
+        (jsonResponse2 \ "color") mustBe (jsonRequest \ "color")
       }
     }
 
