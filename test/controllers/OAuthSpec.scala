@@ -43,6 +43,7 @@ class OAuthSpec extends BaseSpec with FutureTest {
         status(registrationMethod) mustBe OK
         val jsResponse = contentAsJson(registrationMethod)
         (jsResponse \ "token").asOpt[String].isDefined mustBe true
+        (jsResponse \ "userId").asOpt[Int].isDefined mustBe true
       }
 
       "Wrong userNetworkId" in {
@@ -94,6 +95,7 @@ class OAuthSpec extends BaseSpec with FutureTest {
         status(registrationMethod) mustBe OK
         val jsResponse = contentAsJson(registrationMethod)
         (jsResponse \ "token").asOpt[String].isDefined mustBe true
+        (jsResponse \ "userId").asOpt[Int].isDefined mustBe true
       }
 
       "Wrong userNetworkId" in {
@@ -171,6 +173,7 @@ class OAuthSpec extends BaseSpec with FutureTest {
         status(registrationMethod) mustBe OK
         val jsResponse = contentAsJson(registrationMethod)
         (jsResponse \ "token").asOpt[String].isDefined mustBe true
+        (jsResponse \ "userId").asOpt[Int].isDefined mustBe true
       }
 
       "Wrong userNetworkId" in {
@@ -222,6 +225,7 @@ class OAuthSpec extends BaseSpec with FutureTest {
         status(registrationMethod) mustBe OK
         val jsResponse = contentAsJson(registrationMethod)
         (jsResponse \ "token").asOpt[String].isDefined mustBe true
+        (jsResponse \ "userId").asOpt[Int].isDefined mustBe true
       }
 
       "Wrong userNetworkId" in {

@@ -40,7 +40,7 @@ class AuthController @Inject() (userDAO: UserDAO, usersApiTokenDAO: UsersApiToke
           if (BCrypt.checkpw(password, user.passHash)) {
             usersApiTokenDAO.removeOldUserAppTokens(request.appId, user.id).flatMap { _ =>
               usersApiTokenDAO.generateToken(request.appId, user.id).map { case (token, _) =>
-                Ok(Json.obj("token" -> token))
+                Ok(Json.obj("token" -> token, "userId" -> user.id))
               }
             }
           }

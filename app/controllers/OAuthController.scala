@@ -23,7 +23,7 @@ extends InjectedController {
   def registration(networkName: String) = actions.AppIdFilterAction.async { implicit request =>
     val jsonRequest = Form(
       tuple(
-        "userNetworkId" -> longNumber(0),
+        "userNetworkId" -> nonEmptyText,
         "token" -> nonEmptyText
       )
     )
@@ -31,20 +31,32 @@ extends InjectedController {
     JsonFormHelper.asyncJsonForm(jsonRequest) {
       case (userNetworkId, token) =>
         oAuthChecker.checkUserNetworkIdAndToken(networkName, OAuthCredentials(userNetworkId, token)).flatMap {
-          case res: OAuthSuccess => userHasSocialNetworkDAO.isUserNetworkIdAlreadySignedUp(userNetworkId).flatMap { isAlreadySignedUp =>
+          case oAuthSuccess: OAuthSuccess => userHasSocialNetworkDAO.isUserNetworkIdAlreadySignedUp(userNetworkId).flatMap { isAlreadySignedUp =>
 
             if (isAlreadySignedUp)
               Future.successful(BadRequest(JsonErrors.OAuthAlreadySignedUp))
             else {
-              val emailOpt = res.email
+              val emailOpt = oAuthSuccess.email
               if (emailOpt.isEmpty)
                 Future.successful(BadRequest(JsonErrors.OAuthEmptyEmail))
               else {
-                for {
-                  userId <- userDAO.create(emailOpt.get, "   ")
-                  _ <- userHasSocialNetworkDAO.addSocialNetworkToUser(UserHasSocialNetwork(userId, networkName, userNetworkId, emailOpt))
-                  whipcakeTokenTuple <- usersApiTokenDAO.generateToken(request.appId, userId)
-                } yield Ok(Json.obj("token" -> whipcakeTokenTuple._1))
+                val email = emailOpt.get
+
+                // check whether user signed up with different oauth network with the same email or not
+                userHasSocialNetworkDAO.findUserByEmail(email).flatMap { userOpt =>
+                  userOpt.map { _ =>
+                    // user signed up with different oauth network with the same email
+                    Future.successful(Conflict(JsonErrors.OAuthEmailConflict))
+                  } getOrElse {
+                    // user DID NOT sign up with different oauth network with the same email
+                    // Sign up new user
+                    for {
+                      userId <- userDAO.create(email, "   ")
+                      _ <- userHasSocialNetworkDAO.addSocialNetworkToUser(UserHasSocialNetwork(userId, networkName, userNetworkId, emailOpt))
+                      whipcakeTokenTuple <- usersApiTokenDAO.generateToken(request.appId, userId)
+                    } yield Ok(Json.obj("token" -> whipcakeTokenTuple._1, "userId" -> userId))
+                  }
+                }
               }
             }
 
@@ -57,7 +69,7 @@ extends InjectedController {
   def auth(networkName: String) = actions.AppIdFilterAction.async { implicit request =>
     val jsonRequest = Form(
       tuple(
-        "userNetworkId" -> longNumber(0),
+        "userNetworkId" -> nonEmptyText,
         "token" -> nonEmptyText
       )
     )
@@ -74,7 +86,7 @@ extends InjectedController {
                   userHasSocialNetworkDAO.updateUsersNetworkEmail(userId, networkName, emailOpt.get)
 
                 usersApiTokenDAO.generateToken(request.appId, userId).map { whipcakeTokenTuple =>
-                  Ok(Json.obj("token" -> whipcakeTokenTuple._1))
+                  Ok(Json.obj("token" -> whipcakeTokenTuple._1, "userId" -> userId))
                 }
               } getOrElse Future.successful(BadRequest(JsonErrors.OAuthFailed))
             }

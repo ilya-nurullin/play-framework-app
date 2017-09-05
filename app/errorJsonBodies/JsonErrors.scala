@@ -32,6 +32,7 @@ object JsonErrors {
   lazy val OAuthEmptyEmail = Json.toJson(JsonError("oauth_empty_email")) // for registration
   lazy val OAuthFailed = Json.toJson(JsonError("oauth_failed"))
   lazy val OAuthAlreadySignedUp = Json.toJson(JsonError("oauth_already_signed_up"))
+  lazy val OAuthEmailConflict = Json.toJson(JsonError("oauth_email_conflict"))
 
   lazy val WrongPassword = Json.toJson(JsonError("wrong_password"))
 

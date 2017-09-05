@@ -50,7 +50,7 @@ class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient
           Some("Поздравляем Вас с успешной регистрацией в Whipcake!")))
         usersApiTokenDAO.generateToken(request.appId, userId).map {
           case (token, _) =>
-            Ok(Json.obj("token" -> token)).withHeaders("Location" -> routes.UserController.get(userId).url)
+            Ok(Json.obj("token" -> token, "userId" -> userId)).withHeaders("Location" -> routes.UserController.get(userId).url)
           case _ => Ok(JsNull)
         }
       }.recover {
