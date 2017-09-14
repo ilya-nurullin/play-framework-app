@@ -1,1 +1,10 @@
 # https://www.playframework.com/documentation/latest/ScalaI18N
+
+tasks.greetingTasks.first.title = The first tasks
+tasks.greetingTasks.second.title = The second tasks
+tasks.greetingTasks.third.title = The third tasks
+
+project.default.name = Default project
+
+registration.email.title = Congratulate with registration
+registration.email.body = Congratulate with registration body

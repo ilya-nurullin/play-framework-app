@@ -15,7 +15,7 @@ import scala.language.postfixOps
 class OAuthSpec extends BaseSpec with FutureTest {
   "Facebook OAuth" should {
     val controller = app.injector.instanceOf[OAuthController]
-    val facebookToken = "EAAbfGCbNYIQBAKe1eRtz9MgNNRjbQRI1cxZB8yEA2ehh2ZBR9po7dvTgLCo9h2TlBCgJ2w773b5NvvV5GvQgvua1YYBr3dZBfaHPmaNXbFQ3mL4OACDoYJSAZCe338YfxUGphCGTkvEpfMRmv8zJdpSyzhrgsEUZA139XF8blOg8udE15UgZBo"
+    val facebookToken = "***REMOVED***"
     val email = "***REMOVED***"
     val userNetworkId = "***REMOVED***"
     val socName = "facebook"

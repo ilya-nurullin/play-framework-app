@@ -1,6 +1,6 @@
 package controllers
 
-import models.UserDAO
+import models.{ProjectDAO, TaskDAO, UserDAO}
 import play.api.libs.json.{JsNull, Json}
 import play.api.test.Helpers._
 import test.{BaseSpec, FutureTest}
@@ -55,7 +55,7 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
         status(badMethodPost) mustBe UNAUTHORIZED
       }
 
-      "Create a new user" in {
+      "Create a new user with default tasks" in {
         val email = "someEmail@e.e"
         val methodPost = controller.create().apply(fakeRequestWithRightAppKeyHeader.withJsonBody(
           Json.obj("email" -> email, "password" -> "somePassword")
@@ -70,6 +70,14 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
           val user = userOpt.get
           header("Location", methodPost) mustBe Some(routes.UserController.get(user.id).toString)
           (contentAsJson(methodPost) \ "token").asOpt[String].isDefined mustBe true
+
+          whenReady(app.injector.instanceOf[ProjectDAO].getLatestProjects(user.id)) { projects =>
+            projects.length mustBe 1
+          }
+
+          whenReady(app.injector.instanceOf[TaskDAO].getLatestTasks(user.id)) { tasks =>
+            tasks.length mustBe 3
+          }
         }
       }
     }

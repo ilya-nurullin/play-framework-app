@@ -5,20 +5,23 @@ import javax.inject._
 import actions.Actions
 import errorJsonBodies.JsonErrors
 import helpers.{DateHelper, JsonFormHelper}
-import models.{UserDAO, UsersApiTokenDAO}
+import models.{ProjectDAO, TaskDAO, UserDAO, UsersApiTokenDAO}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.libs.json._
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc._
 import org.mindrot.jbcrypt.BCrypt
+import play.api.i18n.{I18nSupport, Messages}
 
 import scala.concurrent.{ExecutionContext, Future}
 import json.implicits.formats.DateJsonFormat._
 
 @Singleton
-class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient: MailerClient,
-                                usersApiTokenDAO: UsersApiTokenDAO)(implicit ec: ExecutionContext) extends InjectedController {
+class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient: MailerClient,
+                                usersApiTokenDAO: UsersApiTokenDAO, projectDAO: ProjectDAO, taskDAO: TaskDAO)
+                              (implicit ec: ExecutionContext)
+    extends InjectedController with I18nSupport {
   val AuthAction = actions.AuthAction
   implicit val fullUserFormat = Json.format[FullUserJson]
 
@@ -46,10 +49,11 @@ class UserController @Inject() (userDAO: UserDAO, actions: Actions, mailerClient
       val password = emailPassword._2
 
       userDAO.create(email, BCrypt.hashpw(password, BCrypt.gensalt())).flatMap { userId =>
-        mailerClient.send(Email("Поздравляем Вас с регистрацией", "Whipcake <noreply@whipcake.com>", Seq(email),
-          Some("Поздравляем Вас с успешной регистрацией в Whipcake!")))
+        mailerClient.send(Email(Messages("registration.email.title"), "Whipcake <noreply@whipcake.com>", Seq(email),
+          Some(Messages("registration.email.body"))))
         usersApiTokenDAO.generateToken(request.appId, userId).map {
           case (token, _) =>
+            projectDAO.createDefaultProject(userId).map(taskDAO.createGreetingTasks(userId, _))
             Ok(Json.obj("token" -> token, "userId" -> userId)).withHeaders("Location" -> routes.UserController.get(userId).url)
           case _ => Ok(JsNull)
         }

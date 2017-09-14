@@ -5,14 +5,16 @@ import javax.inject._
 import com.github.tototoshi.slick.MySQLJodaSupport._
 import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider
+import play.api.i18n.Messages
 import slick.jdbc.JdbcProfile
 import slick.jdbc.MySQLProfile.api._
 import slick.lifted.{TableQuery, Tag}
 
 import scala.concurrent.ExecutionContext
 
-case class Project(id: Long, title: String, description: Option[String], isArchived: Boolean, color: Option[String],
-                   createdAt: Option[DateTime] = Some(DateTime.now()), updatedAt: Option[DateTime] = Some(DateTime.now()))
+case class Project(id: Long, title: String, description: Option[String] = None, isArchived: Boolean = false,
+                   color: Option[String] = None, createdAt: Option[DateTime] = Some(DateTime.now()),
+                   updatedAt: Option[DateTime] = Some(DateTime.now()))
 
 class ProjectTable(tag: Tag) extends Table[Project](tag, "projects") {
   def id = column[Long]("id", O.AutoInc, O.PrimaryKey)
@@ -90,5 +92,9 @@ class ProjectDAO @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit e
 
   def deleteProject(projectId: Long) = dbConfig.db.run {
     projects.filter(_.id === projectId).delete
+  }
+
+  def createDefaultProject(userId: Int)(implicit messages: Messages) = {
+    createNewProject(userId, Project(0, messages("project.default.name")))
   }
 }

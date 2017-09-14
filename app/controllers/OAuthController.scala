@@ -5,20 +5,22 @@ import javax.inject._
 import actions.Actions
 import errorJsonBodies.JsonErrors
 import helpers.JsonFormHelper
-import models.{UserDAO, UserHasSocialNetwork, UserHasSocialNetworkDAO, UsersApiTokenDAO}
+import models._
 import oauth._
 import play.api.data._
 import play.api.data.Forms._
 import play.api.libs.json.Json
 import play.api.mvc._
+import play.api.i18n.I18nSupport
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class OAuthController @Inject() (actions: Actions, userHasSocialNetworkDAO: UserHasSocialNetworkDAO,
-                                 oAuthChecker: OAuthChecker, userDAO: UserDAO, usersApiTokenDAO: UsersApiTokenDAO)
+                                 oAuthChecker: OAuthChecker, userDAO: UserDAO, usersApiTokenDAO: UsersApiTokenDAO,
+                                 projectDAO: ProjectDAO, taskDAO: TaskDAO)
                                 (implicit ec: ExecutionContext)
-extends InjectedController {
+extends InjectedController with I18nSupport {
 
   def registration(networkName: String) = actions.AppIdFilterAction.async { implicit request =>
     val jsonRequest = Form(
@@ -54,7 +56,10 @@ extends InjectedController {
                       userId <- userDAO.create(email, "   ")
                       _ <- userHasSocialNetworkDAO.addSocialNetworkToUser(UserHasSocialNetwork(userId, networkName, userNetworkId, emailOpt))
                       whipcakeTokenTuple <- usersApiTokenDAO.generateToken(request.appId, userId)
-                    } yield Ok(Json.obj("token" -> whipcakeTokenTuple._1, "userId" -> userId))
+                    } yield {
+                      projectDAO.createDefaultProject(userId).map(taskDAO.createGreetingTasks(userId, _))
+                      Ok(Json.obj("token" -> whipcakeTokenTuple._1, "userId" -> userId))
+                    }
                   }
                 }
               }

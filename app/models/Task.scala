@@ -6,6 +6,7 @@ import com.github.tototoshi.slick.MySQLJodaSupport._
 import json.implicits.JsObjectMappedColumn
 import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider
+import play.api.i18n.Messages
 import play.api.libs.json.JsObject
 import slick.jdbc.JdbcProfile
 import slick.jdbc.MySQLProfile.api._
@@ -112,6 +113,12 @@ class TaskDAO @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit ec: 
 
   def deleteTask(taskId: Long) = dbConfig.db.run {
     tasks.filter(_.id === taskId).delete
+  }
+
+  def createGreetingTasks(userId: Int, projectId: Long)(implicit messages: Messages) = {
+    createNewTask(userId, Task(0, messages("tasks.greetingTasks.first.title"), projectId))
+    createNewTask(userId, Task(0, messages("tasks.greetingTasks.second.title"), projectId))
+    createNewTask(userId, Task(0, messages("tasks.greetingTasks.third.title"), projectId))
   }
 
 }
