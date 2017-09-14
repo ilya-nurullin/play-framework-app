@@ -38,7 +38,7 @@ class UserHasProjectTable(tag: Tag) extends Table[UserHasProject](tag, "user_has
 }
 
 @Singleton
-class ProjectDAO @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
+class ProjectDAO @Inject() (dbConfigProvider: DatabaseConfigProvider, userDAO: UserDAO)(implicit ec: ExecutionContext) {
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
 
   val projects = TableQuery[ProjectTable]
@@ -95,6 +95,9 @@ class ProjectDAO @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit e
   }
 
   def createDefaultProject(userId: Int)(implicit messages: Messages) = {
-    createNewProject(userId, Project(0, messages("project.default.name")))
+    for {
+      projectId <- createNewProject(userId, Project(0, messages("project.default.name")))
+      _ <- userDAO.changeDefaultProject(userId, projectId)
+    } yield projectId
   }
 }

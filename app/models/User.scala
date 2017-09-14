@@ -20,7 +20,8 @@ case class User(id: Int, login: String, email: String, passHash: String, name: O
                 avatar: Option[String] = None, aboutMyself: Option[String] = None, dateOfBirth: Option[Date] = None,
                 sex: Option[Boolean] = None, createdAt: DateTime, updatedAt: DateTime,
                 cityId: Option[Int] = None, statuses: Option[String] = None, userRankId: Int,
-                premiumUntil: Option[DateTime] = None, isBanned: Boolean = false, socNetworks: Option[JsArray] = None)
+                premiumUntil: Option[DateTime] = None, isBanned: Boolean = false, socNetworks: Option[JsArray] = None,
+                defaultProject: Option[Long] = None)
 
 class UsersTable(tag: Tag) extends Table[User](tag, "users") with JsArrayMappedColumn {
 
@@ -41,9 +42,10 @@ class UsersTable(tag: Tag) extends Table[User](tag, "users") with JsArrayMappedC
   def premiumUntil = column[Option[DateTime]]("premium_until")
   def isBanned = column[Boolean]("is_banned")
   def socNetworks = column[Option[JsArray]]("soc_networks")
+  def defaultProject = column[Option[Long]]("default_project")
 
   def * = (id, login, email, passHash, name, avatar, aboutMyself, dateOfBirth, sex, createdAt, updatedAt, cityId, statuses,
-    userRankId, premiumUntil, isBanned, socNetworks) <> ( User.tupled, User.unapply )
+    userRankId, premiumUntil, isBanned, socNetworks, defaultProject) <> ( User.tupled, User.unapply)
 }
 
 @Singleton
@@ -105,6 +107,10 @@ class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: E
 
   def changePassword(userId: Int, newPasswordHash: String) = dbConfig.db.run {
     users.filter(_.id === userId).map(_.passHash).update(newPasswordHash)
+  }
+
+  def changeDefaultProject(userId: Int, projectId: Long) = dbConfig.db.run {
+    users.filter(_.id === userId).map(_.defaultProject).update(Some(projectId))
   }
 
 }
