@@ -132,6 +132,24 @@ class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient:
     }
   }
 
+  def changeDefaultProject() = actions.AuthAction.async { implicit request =>
+    val projectFrom = Form(
+      single(
+        "projectId" -> longNumber
+      )
+    )
+    JsonFormHelper.asyncJsonForm(projectFrom) { projectId =>
+      projectDAO.isProjectOwner(request.userId, projectId).flatMap { isOwner =>
+        if (isOwner)
+          for {
+            _ <- userDAO.changeDefaultProject(request.userId, projectId)
+          } yield NoContent
+        else
+          Future.successful(Forbidden(JsonErrors.ChangingSomeoneElsesObject))
+      }
+    }
+  }
+
 
   case class FullUserJson(
                            id: Int,

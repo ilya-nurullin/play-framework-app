@@ -1,5 +1,6 @@
 package controllers
 
+import errorJsonBodies.JsonErrors
 import models.{ProjectDAO, TaskDAO, UserDAO}
 import play.api.libs.json.{JsNull, Json}
 import play.api.test.Helpers._
@@ -197,6 +198,30 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
         val changeMethod = controller.changePassword(1).apply(fakeRequestWithRightAuthHeaders.withJsonBody(jsonRequest))
 
         status(changeMethod) mustBe FORBIDDEN
+      }
+    }
+
+    "Change default project" should {
+      val controller = app.injector.instanceOf[UserController]
+
+      "BE OK" in {
+        val jsonBody = Json.obj("projectId" -> 3)
+        val method = controller.changeDefaultProject().apply(fakeRequestWithRightAuthHeaders.withJsonBody(jsonBody))
+
+        status(method) mustBe NO_CONTENT
+
+        whenReady(app.injector.instanceOf[UserDAO].getById(1)) { userOpt =>
+          val user = userOpt.get
+          user.defaultProject.get mustBe 3
+        }
+      }
+
+      "Deny on changing on non own project" in {
+        val jsonBody = Json.obj("projectId" -> 2)
+        val method = controller.changeDefaultProject().apply(fakeRequestWithRightAuthHeaders.withJsonBody(jsonBody))
+
+        status(method) mustBe FORBIDDEN
+        contentAsJson(method) mustBe JsonErrors.ChangingSomeoneElsesObject
       }
     }
   }
