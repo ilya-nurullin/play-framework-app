@@ -48,6 +48,7 @@ class TaskController @Inject()(actions: Actions, taskDAO: TaskDAO, projectDAO: P
           "deadline" -> optional(jodaDate(DateJsonFormat.format)),
           "importance" -> optional(number(0, 100)),
           "complexity" -> optional(number(0, 100)),
+          "isOpenForSurety" -> boolean,
           "isArchived" -> default(boolean, false)
         )(TaskModel.apply)(TaskModel.unapply)
       )
@@ -56,7 +57,8 @@ class TaskController @Inject()(actions: Actions, taskDAO: TaskDAO, projectDAO: P
         projectDAO.isProjectOwner(request.userId, task.projectId).flatMap { isOwner =>
           if (isOwner)
             taskDAO.createNewTask(request.userId, models.Task(0, task.title, task.projectId, task.description, task.deadline,
-              (request.body.asJson.get \ "data").asOpt[JsObject], task.importance, task.complexity)
+              (request.body.asJson.get \ "data").asOpt[JsObject], task.importance, task.complexity,
+              isOpenForSurety = task.isOpenForSurety, isArchived = task.isArchived)
             ).flatMap { taskId =>
               taskDAO.getById(taskId, request.userId).map { taskOpt =>
                 Ok(Json.toJson(taskOpt))
@@ -83,6 +85,7 @@ class TaskController @Inject()(actions: Actions, taskDAO: TaskDAO, projectDAO: P
             "deadline" -> optional(jodaDate(DateJsonFormat.format)),
             "importance" -> optional(number(0, 100)),
             "complexity" -> optional(number(0, 100)),
+            "isOpenForSurety" -> boolean,
             "isArchived" -> boolean
           )(TaskModel.apply)(TaskModel.unapply)
         )
@@ -91,7 +94,8 @@ class TaskController @Inject()(actions: Actions, taskDAO: TaskDAO, projectDAO: P
           projectDAO.isProjectOwner(request.userId, task.projectId).flatMap { isOwner =>
             if (isOwner)
               taskDAO.updateTask(taskId, task.title, task.projectId, task.description, task.deadline,
-                (request.body.asJson.get \ "data").asOpt[JsObject], task.importance, task.complexity, task.isArchived).map {
+                (request.body.asJson.get \ "data").asOpt[JsObject], task.importance, task.complexity, task.isOpenForSurety,
+                  task.isArchived).map {
                 updatedTask =>
                   Ok(Json.toJson(updatedTask))
               }
@@ -119,9 +123,6 @@ class TaskController @Inject()(actions: Actions, taskDAO: TaskDAO, projectDAO: P
     }
   }
 
-  case class CreateTaskModel(title: String, projectId: Long, description: Option[String], deadline: Option[DateTime],
-                  importance: Option[Int], complexity: Option[Int])
-
   case class TaskModel(title: String, projectId: Long, description: Option[String], deadline: Option[DateTime],
-                       importance: Option[Int], complexity: Option[Int], isArchived: Boolean)
+                       importance: Option[Int], complexity: Option[Int], isOpenForSurety: Boolean, isArchived: Boolean)
 }

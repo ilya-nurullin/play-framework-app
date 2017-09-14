@@ -16,7 +16,8 @@ import scala.concurrent.ExecutionContext
 
 case class Task(id: Long, title: String, projectId: Long, description: Option[String] = None, deadline: Option[DateTime] = None,
                 data: Option[JsObject] = None, importance: Option[Int] = None, complexity: Option[Int] = None,
-                createdAt: DateTime = DateTime.now(), updatedAt: DateTime = DateTime.now(), isArchived: Boolean = false)
+                createdAt: DateTime = DateTime.now(), updatedAt: DateTime = DateTime.now(), isOpenForSurety: Boolean = false,
+                isArchived: Boolean = false)
 
 class TaskTable(tag: Tag) extends Table[Task](tag, "tasks") with JsObjectMappedColumn {
   def id = column[Long]("id", O.AutoInc, O.PrimaryKey)
@@ -29,10 +30,11 @@ class TaskTable(tag: Tag) extends Table[Task](tag, "tasks") with JsObjectMappedC
   def complexity = column[Option[Int]]("complexity")
   def createdAt = column[DateTime]("created_at")
   def updatedAt = column[DateTime]("updated_at")
+  def isOpenForSurety = column[Boolean]("is_open_for_surety")
   def isArchived = column[Boolean]("is_archived")
 
-  def * = (id, title, projectId, description, deadline, data, importance, complexity, createdAt, updatedAt, isArchived) <>
-    (Task.tupled, Task.unapply)
+  def * = (id, title, projectId, description, deadline, data, importance, complexity, createdAt, updatedAt, isOpenForSurety,
+      isArchived) <> (Task.tupled, Task.unapply)
 }
 
 case class UserHasTask(userId: Int, taskId: Long)
@@ -101,7 +103,8 @@ class TaskDAO @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit ec: 
   }
 
   def updateTask(taskId: Long,  title: String, projectId: Long, description: Option[String], deadline: Option[DateTime],
-                 data: Option[JsObject], importance: Option[Int], complexity: Option[Int], isArchived: Boolean) = {
+                 data: Option[JsObject], importance: Option[Int], complexity: Option[Int], isOpenForSurety: Boolean,
+                 isArchived: Boolean) = {
     dbConfig.db.run {
       tasks.filter(_.id === taskId).
         map(r => (r.title, r.projectId, r.description, r.deadline, r.data, r.importance, r.complexity, r.isArchived)).

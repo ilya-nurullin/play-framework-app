@@ -59,6 +59,7 @@ class TaskControllerSpec  extends BaseSpec with AuthActionBehaviors with FutureT
           "deadline" -> DateTime.now().toString(DateJsonFormat.format),
           "importance" -> 1,
           "complexity" -> 6,
+          "isOpenForSurety" -> true,
           "data" -> Json.obj("tags" -> Json.arr(Seq("tag1", "tag2")))
         )
 
@@ -74,6 +75,7 @@ class TaskControllerSpec  extends BaseSpec with AuthActionBehaviors with FutureT
         (jsonResponse \ "deadline") mustBe (newTaskJson \ "deadline")
         (jsonResponse \ "importance") mustBe (newTaskJson \ "importance")
         (jsonResponse \ "complexity") mustBe (newTaskJson \ "complexity")
+        (jsonResponse \ "isOpenForSurety") mustBe (newTaskJson \ "isOpenForSurety")
         (jsonResponse \ "data") mustBe (newTaskJson \ "data")
       }
 
@@ -112,6 +114,7 @@ class TaskControllerSpec  extends BaseSpec with AuthActionBehaviors with FutureT
           "deadline" -> DateTime.now().toString(DateJsonFormat.format),
           "importance" -> 3,
           "complexity" -> 7,
+          "isOpenForSurety" -> false,
           "data" -> Json.obj("tags" -> Json.arr(Seq("tag3", "tag4")))
         )
 
@@ -127,6 +130,7 @@ class TaskControllerSpec  extends BaseSpec with AuthActionBehaviors with FutureT
         (jsonResponse \ "deadline") mustBe (newTaskJson \ "deadline")
         (jsonResponse \ "importance") mustBe (newTaskJson \ "importance")
         (jsonResponse \ "complexity") mustBe (newTaskJson \ "complexity")
+        (jsonResponse \ "isOpenForSurety") mustBe (newTaskJson \ "isOpenForSurety")
         (jsonResponse \ "data") mustBe (newTaskJson \ "data")
       }
 
