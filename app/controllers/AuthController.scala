@@ -38,10 +38,8 @@ class AuthController @Inject() (userDAO: UserDAO, usersApiTokenDAO: UsersApiToke
       userDAO.getByEmail(email).flatMap { userOpt =>
         userOpt.map { user =>
           if (BCrypt.checkpw(password, user.passHash)) {
-            usersApiTokenDAO.removeOldUserAppTokens(request.appId, user.id).flatMap { _ =>
-              usersApiTokenDAO.generateToken(request.appId, user.id).map { case (token, _) =>
-                Ok(Json.obj("token" -> token, "userId" -> user.id))
-              }
+            usersApiTokenDAO.generateToken(request.appId, user.id).map { case (token, _) =>
+              Ok(Json.obj("token" -> token, "userId" -> user.id))
             }
           }
           else
