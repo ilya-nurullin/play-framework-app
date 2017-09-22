@@ -44,6 +44,10 @@ class UsersApiTokenDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, confi
     usersToken.filter(u => u.appId === appId && u.userId === userId).delete
   }
 
+  def removeUserAppToken(appId: Int, userId: Int, token: String) = dbConfig.db.run {
+    usersToken.filter(r => r.appId === appId && r.userId === userId && r.token === token).delete
+  }
+
 
   def generateToken(appId: Int, userId: Int, round: Int = 1): Future[(String, DateTime)] = {
     if (round == 11) return Future.failed(new InterruptedException("Too many rounds for generate a token. Maybe primary or unique keys duplications"))
