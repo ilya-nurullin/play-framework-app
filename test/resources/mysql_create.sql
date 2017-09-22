@@ -203,6 +203,7 @@ CREATE TABLE IF NOT EXISTS `user_has_api_token` (
   `token` varchar(30) NOT NULL,
   `user_id` int(10) unsigned NOT NULL,
   `app_id` int(11) unsigned NOT NULL,
+  `firebase_token` VARCHAR(255) NOT NULL,
   `expires_at` datetime NOT NULL,
   PRIMARY KEY (`token`),
   UNIQUE KEY `user_id` (`user_id`,`app_id`),
@@ -214,10 +215,10 @@ CREATE TABLE IF NOT EXISTS `user_has_api_token` (
 
 -- Дамп данных таблицы whipcake.users_has_api_tokens: ~4 rows (приблизительно)
 /*!40000 ALTER TABLE `user_has_api_token` DISABLE KEYS */;
-INSERT INTO `user_has_api_token` (`token`, `user_id`, `app_id`, `expires_at`) VALUES
-  ('2', 2, 1, '2017-07-24 11:16:11'),
-  ('ft1IjFotneQESvMktZqVrQ4Xas0weJ', 1, 2, ADDDATE(NOW(), INTERVAL 17 DAY)),
-  ('PjdSyBX62WSq8b1IEOEFMfsjBYZcpP', 1, 1, ADDDATE(NOW(), INTERVAL 17 DAY));
+INSERT INTO `user_has_api_token` (`token`, `user_id`, `app_id`, `firebase_token`, `expires_at`) VALUES
+  ('2', 2, 1, 'asd', '2017-07-24 11:16:11'),
+  ('ft1IjFotneQESvMktZqVrQ4Xas0weJ', 1, 2, 'asd', ADDDATE(NOW(), INTERVAL 17 DAY)),
+  ('PjdSyBX62WSq8b1IEOEFMfsjBYZcpP', 1, 1, 'asd',ADDDATE(NOW(), INTERVAL 17 DAY));
 /*!40000 ALTER TABLE `user_has_api_token` ENABLE KEYS */;
 
 -- Дамп структуры для таблица whipcake.user_has_project

@@ -40,26 +40,25 @@ class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient:
     val jsonRequest = Form(
       tuple(
         "email" -> email,
-        "password" -> nonEmptyText(6)
+        "password" -> nonEmptyText(6),
+        "firebaseToken" -> nonEmptyText
       )
     )
 
-    JsonFormHelper.asyncJsonForm(jsonRequest) { emailPassword =>
-      val email = emailPassword._1
-      val password = emailPassword._2
-
-      userDAO.create(email, BCrypt.hashpw(password, BCrypt.gensalt())).flatMap { userId =>
-        mailerClient.send(Email(Messages("registration.email.title"), "Whipcake <noreply@whipcake.com>", Seq(email),
-          Some(Messages("registration.email.body"))))
-        usersApiTokenDAO.generateToken(request.appId, userId).map {
-          case (token, _) =>
-            projectDAO.createDefaultProject(userId).map(taskDAO.createGreetingTasks(userId, _))
-            Ok(Json.obj("token" -> token, "userId" -> userId)).withHeaders("Location" -> routes.UserController.get(userId).url)
-          case _ => Ok(JsNull)
+    JsonFormHelper.asyncJsonForm(jsonRequest) {
+      case (email, password, firebaseToken) =>
+        userDAO.create(email, BCrypt.hashpw(password, BCrypt.gensalt())).flatMap { userId =>
+          mailerClient.send(Email(Messages("registration.email.title"), "Whipcake <noreply@whipcake.com>", Seq(email),
+            Some(Messages("registration.email.body"))))
+          usersApiTokenDAO.generateToken(request.appId, userId, firebaseToken).map {
+            case (token, _) =>
+              projectDAO.createDefaultProject(userId).map(taskDAO.createGreetingTasks(userId, _))
+              Ok(Json.obj("token" -> token, "userId" -> userId)).withHeaders("Location" -> routes.UserController.get(userId).url)
+            case _ => Ok(JsNull)
+          }
+        }.recover {
+          case _: java.sql.SQLIntegrityConstraintViolationException => Conflict(JsonErrors.EmailAlreadySignedUp)
         }
-      }.recover {
-        case _: java.sql.SQLIntegrityConstraintViolationException => Conflict(JsonErrors.EmailAlreadySignedUp)
-      }
     }
 
   }

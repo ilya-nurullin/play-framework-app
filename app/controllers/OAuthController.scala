@@ -26,12 +26,13 @@ extends InjectedController with I18nSupport {
     val jsonRequest = Form(
       tuple(
         "userNetworkId" -> nonEmptyText,
-        "token" -> nonEmptyText
+        "token" -> nonEmptyText,
+        "firebaseToken" -> nonEmptyText
       )
     )
 
     JsonFormHelper.asyncJsonForm(jsonRequest) {
-      case (userNetworkId, token) =>
+      case (userNetworkId, token, firebaseToken) =>
         oAuthChecker.checkUserNetworkIdAndToken(networkName, OAuthCredentials(userNetworkId, token)).flatMap {
           case oAuthSuccess: OAuthSuccess => userHasSocialNetworkDAO.isUserNetworkIdAlreadySignedUp(userNetworkId).flatMap { isAlreadySignedUp =>
 
@@ -55,7 +56,7 @@ extends InjectedController with I18nSupport {
                     for {
                       userId <- userDAO.create(email, "   ")
                       _ <- userHasSocialNetworkDAO.addSocialNetworkToUser(UserHasSocialNetwork(userId, networkName, userNetworkId, emailOpt))
-                      whipcakeTokenTuple <- usersApiTokenDAO.generateToken(request.appId, userId)
+                      whipcakeTokenTuple <- usersApiTokenDAO.generateToken(request.appId, userId, firebaseToken)
                     } yield {
                       projectDAO.createDefaultProject(userId).map(taskDAO.createGreetingTasks(userId, _))
                       Ok(Json.obj("token" -> whipcakeTokenTuple._1, "userId" -> userId))
@@ -75,12 +76,13 @@ extends InjectedController with I18nSupport {
     val jsonRequest = Form(
       tuple(
         "userNetworkId" -> nonEmptyText,
-        "token" -> nonEmptyText
+        "token" -> nonEmptyText,
+        "firebaseToken" -> nonEmptyText
       )
     )
 
     JsonFormHelper.asyncJsonForm(jsonRequest) {
-      case (userNetworkId, token) =>
+      case (userNetworkId, token, firebaseToken) =>
         oAuthChecker.checkUserNetworkIdAndToken(networkName, OAuthCredentials(userNetworkId, token)).flatMap {
           case res: OAuthSuccess =>
             userHasSocialNetworkDAO.getUserIdByNetworkNameAndNetworkUserId(networkName, userNetworkId).flatMap { userIdOpt =>
@@ -90,7 +92,7 @@ extends InjectedController with I18nSupport {
                 if (emailOpt.isDefined)
                   userHasSocialNetworkDAO.updateUsersNetworkEmail(userId, networkName, emailOpt.get)
 
-                usersApiTokenDAO.generateToken(request.appId, userId).map { whipcakeTokenTuple =>
+                usersApiTokenDAO.generateToken(request.appId, userId, firebaseToken).map { whipcakeTokenTuple =>
                   Ok(Json.obj("token" -> whipcakeTokenTuple._1, "userId" -> userId))
                 }
               } getOrElse Future.successful(BadRequest(JsonErrors.OAuthFailed))

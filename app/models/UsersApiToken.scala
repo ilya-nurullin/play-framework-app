@@ -13,15 +13,16 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
 
-case class UsersApiToken(token: String, userId: Int, appId: Int, expiresAt: DateTime)
+case class UsersApiToken(token: String, userId: Int, appId: Int, firebaseToken: String, expiresAt: DateTime)
 
 class UsersApiTokenTable(tag: Tag) extends Table[UsersApiToken](tag, "user_has_api_token") {
   def token = column[String]("token", O.PrimaryKey)
   def userId = column[Int]("user_id")
   def appId = column[Int]("app_id")
+  def firebaseToken = column[String]("firebase_token")
   def expiresAt = column[DateTime]("expires_at")
 
-  def * = (token, userId, appId, expiresAt) <> (UsersApiToken.tupled, UsersApiToken.unapply)
+  def * = (token, userId, appId, firebaseToken, expiresAt) <> (UsersApiToken.tupled, UsersApiToken.unapply)
 }
 
 @Singleton
@@ -49,18 +50,18 @@ class UsersApiTokenDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, confi
   }
 
 
-  def generateToken(appId: Int, userId: Int, round: Int = 1): Future[(String, DateTime)] = {
+  def generateToken(appId: Int, userId: Int, firebaseToken: String, round: Int = 1): Future[(String, DateTime)] = {
     if (round == 11) return Future.failed(new InterruptedException("Too many rounds for generate a token. Maybe primary or unique keys duplications"))
 
     val tokenLength = Random.alphanumeric.take(config.underlying.getInt("app.models.UsersApiToken.token.length")).mkString
     val expiresAt = DateTime.now().plusDays(config.underlying.getInt("app.models.UsersApiToken.token.lifetime"))
 
     val query = dbConfig.db.run {
-      usersToken += UsersApiToken(tokenLength, userId, appId, expiresAt)
+      usersToken += UsersApiToken(tokenLength, userId, appId, firebaseToken, expiresAt)
     }
 
     query.map(_ => (tokenLength, expiresAt)).recoverWith {
-      case e: java.sql.SQLIntegrityConstraintViolationException => generateToken(appId, userId, round + 1)
+      case e: java.sql.SQLIntegrityConstraintViolationException => generateToken(appId, userId, firebaseToken, round + 1)
     }
 
   }

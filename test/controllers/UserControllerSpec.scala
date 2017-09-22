@@ -46,11 +46,11 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
 
       "Check App-id header" in {
         val methodPost = controller.create().apply(fakeRequestWithRightAppKeyHeader.withJsonBody(
-          Json.obj("email" -> "e@e.e", "password" -> "somePassword")
+          Json.obj("email" -> "e@e.e", "password" -> "somePassword", "firebaseToken" -> "someToken")
         ))
 
         val badMethodPost = controller.create().apply(fakeRequestWithWrongAppKeyHeader.withJsonBody(
-          Json.obj("email" -> "e1", "password" -> "somePassword")
+          Json.obj("email" -> "e1", "password" -> "somePassword", "firebaseToken" -> "someToken")
         ))
         status(methodPost) mustBe OK
         status(badMethodPost) mustBe UNAUTHORIZED
@@ -59,7 +59,7 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
       "Create a new user with default tasks" in {
         val email = "someEmail@e.e"
         val methodPost = controller.create().apply(fakeRequestWithRightAppKeyHeader.withJsonBody(
-          Json.obj("email" -> email, "password" -> "somePassword")
+          Json.obj("email" -> email, "password" -> "somePassword", "firebaseToken" -> "someToken")
         ))
 
         status(methodPost) mustBe OK

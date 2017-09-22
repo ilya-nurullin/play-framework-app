@@ -27,25 +27,24 @@ class AuthController @Inject() (userDAO: UserDAO, usersApiTokenDAO: UsersApiToke
     val jsonRequest = Form(
       tuple(
         "email" -> email,
-        "password" -> nonEmptyText
+        "password" -> nonEmptyText,
+        "firebaseToken" -> nonEmptyText
       )
     )
 
-    JsonFormHelper.asyncJsonForm(jsonRequest) { emailPassword =>
-      val email = emailPassword._1
-      val password = emailPassword._2
-
-      userDAO.getByEmail(email).flatMap { userOpt =>
-        userOpt.map { user =>
-          if (BCrypt.checkpw(password, user.passHash)) {
-            usersApiTokenDAO.generateToken(request.appId, user.id).map { case (token, _) =>
-              Ok(Json.obj("token" -> token, "userId" -> user.id))
+    JsonFormHelper.asyncJsonForm(jsonRequest) {
+      case (email, password, firebaseToken) =>
+        userDAO.getByEmail(email).flatMap { userOpt =>
+          userOpt.map { user =>
+            if (BCrypt.checkpw(password, user.passHash)) {
+              usersApiTokenDAO.generateToken(request.appId, user.id, firebaseToken).map { case (token, _) =>
+                Ok(Json.obj("token" -> token, "userId" -> user.id))
+              }
             }
-          }
-          else
-            Future.successful(BadRequest(JsonErrors.BadCredentials))
-        } getOrElse Future.successful(BadRequest(JsonErrors.BadCredentials))
-      }
+            else
+              Future.successful(BadRequest(JsonErrors.BadCredentials))
+          } getOrElse Future.successful(BadRequest(JsonErrors.BadCredentials))
+        }
     }
   }
 

@@ -35,7 +35,8 @@ class OAuthSpec extends BaseSpec with FutureTest {
       "Register new user" in {
         val jsRequest = Json.obj(
           "token" -> facebookToken,
-          "userNetworkId" -> userNetworkId
+          "userNetworkId" -> userNetworkId,
+          "firebaseToken" -> "someToken"
         )
 
         val registrationMethod = controller.registration(socName).apply(fakeRequestWithRightAppKeyHeader.withJsonBody(jsRequest))
@@ -49,7 +50,8 @@ class OAuthSpec extends BaseSpec with FutureTest {
       "Wrong userNetworkId" in {
         val jsRequest = Json.obj(
           "token" -> facebookToken,
-          "userNetworkId" -> (userNetworkId+"1")
+          "userNetworkId" -> (userNetworkId+"1"),
+          "firebaseToken" -> "someToken"
         )
 
         val registrationMethod = controller.registration(socName).apply(fakeRequestWithRightAppKeyHeader.withJsonBody(jsRequest))
@@ -62,7 +64,8 @@ class OAuthSpec extends BaseSpec with FutureTest {
       "Wrong token" in {
         val jsRequest = Json.obj(
           "token" -> "ASDASDASD",
-          "userNetworkId" -> userNetworkId
+          "userNetworkId" -> userNetworkId,
+          "firebaseToken" -> "someToken"
         )
 
         val registrationMethod = controller.registration(socName).apply(fakeRequestWithRightAppKeyHeader.withJsonBody(jsRequest))
@@ -88,7 +91,8 @@ class OAuthSpec extends BaseSpec with FutureTest {
       "Auth if user already used oauth" in {
         val jsRequest = Json.obj(
           "token" -> facebookToken,
-          "userNetworkId" -> userNetworkId
+          "userNetworkId" -> userNetworkId,
+          "firebaseToken" -> "someToken"
         )
 
         val registrationMethod = controller.auth(socName).apply(FakeRequest().withHeaders("App-key" -> "2").withJsonBody(jsRequest))
@@ -101,7 +105,8 @@ class OAuthSpec extends BaseSpec with FutureTest {
       "Wrong userNetworkId" in {
         val jsRequest = Json.obj(
           "token" -> facebookToken,
-          "userNetworkId" -> (userNetworkId+"1")
+          "userNetworkId" -> (userNetworkId+"1"),
+          "firebaseToken" -> "someToken"
         )
 
         val registrationMethod = controller.auth(socName).apply(fakeRequestWithRightAppKeyHeader.withJsonBody(jsRequest))
@@ -114,7 +119,8 @@ class OAuthSpec extends BaseSpec with FutureTest {
       "Wrong token" in {
         val jsRequest = Json.obj(
           "token" -> "ASDASDASD",
-          "userNetworkId" -> userNetworkId
+          "userNetworkId" -> userNetworkId,
+          "firebaseToken" -> "someToken"
         )
 
         val registrationMethod = controller.auth(socName).apply(fakeRequestWithRightAppKeyHeader.withJsonBody(jsRequest))
@@ -165,7 +171,8 @@ class OAuthSpec extends BaseSpec with FutureTest {
       "Register new user" in {
         val jsRequest = Json.obj(
           "token" -> googleToken,
-          "userNetworkId" -> userNetworkId
+          "userNetworkId" -> userNetworkId,
+          "firebaseToken" -> "someToken"
         )
 
         val registrationMethod = controller.registration(socName).apply(fakeRequestWithRightAppKeyHeader.withJsonBody(jsRequest))
@@ -179,7 +186,8 @@ class OAuthSpec extends BaseSpec with FutureTest {
       "Wrong userNetworkId" in {
         val jsRequest = Json.obj(
           "token" -> googleToken,
-          "userNetworkId" -> (userNetworkId+"1")
+          "userNetworkId" -> (userNetworkId+"1"),
+          "firebaseToken" -> "someToken"
         )
 
         val registrationMethod = controller.registration(socName).apply(fakeRequestWithRightAppKeyHeader.withJsonBody(jsRequest))
@@ -192,7 +200,8 @@ class OAuthSpec extends BaseSpec with FutureTest {
       "Wrong token" in {
         val jsRequest = Json.obj(
           "token" -> "ASDASDASD",
-          "userNetworkId" -> userNetworkId
+          "userNetworkId" -> userNetworkId,
+          "firebaseToken" -> "someToken"
         )
 
         val registrationMethod = controller.registration(socName).apply(fakeRequestWithRightAppKeyHeader.withJsonBody(jsRequest))
@@ -218,7 +227,8 @@ class OAuthSpec extends BaseSpec with FutureTest {
       "Auth if user already used oauth" in {
         val jsRequest = Json.obj(
           "token" -> googleToken,
-          "userNetworkId" -> userNetworkId
+          "userNetworkId" -> userNetworkId,
+          "firebaseToken" -> "someToken"
         )
 
         val registrationMethod = controller.auth(socName).apply(FakeRequest().withHeaders("App-key" -> "2").withJsonBody(jsRequest))
@@ -231,7 +241,8 @@ class OAuthSpec extends BaseSpec with FutureTest {
       "Wrong userNetworkId" in {
         val jsRequest = Json.obj(
           "token" -> googleToken,
-          "userNetworkId" -> (userNetworkId+"1")
+          "userNetworkId" -> (userNetworkId+"1"),
+          "firebaseToken" -> "someToken"
         )
 
         val registrationMethod = controller.auth(socName).apply(fakeRequestWithRightAppKeyHeader.withJsonBody(jsRequest))
@@ -244,7 +255,8 @@ class OAuthSpec extends BaseSpec with FutureTest {
       "Wrong token" in {
         val jsRequest = Json.obj(
           "token" -> "ASDASDASD",
-          "userNetworkId" -> userNetworkId
+          "userNetworkId" -> userNetworkId,
+          "firebaseToken" -> "someToken"
         )
 
         val registrationMethod = controller.auth(socName).apply(fakeRequestWithRightAppKeyHeader.withJsonBody(jsRequest))
