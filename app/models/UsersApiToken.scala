@@ -65,4 +65,8 @@ class UsersApiTokenDAO @Inject()(dbConfigProvider: DatabaseConfigProvider, confi
     }
 
   }
+
+  def updateFirebaseToken(userId: Int, token: String, firebaseToken: String) = dbConfig.db.run {
+    usersToken.filter(r => r.userId === userId && r.token === token).map(_.firebaseToken).update(firebaseToken)
+  }
 }

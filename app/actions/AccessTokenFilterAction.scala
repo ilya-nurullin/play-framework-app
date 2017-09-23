@@ -21,7 +21,7 @@ class AccessTokenFilterAction @Inject() (usersApiToken: UsersApiTokenDAO, apiApp
               case req: RequestWithAppIdAndKey[A] =>
                 if (req.appId == usersToken.appId) {
                   usersApiToken.updateToken(usersToken.token)
-                  block(new UserRequest[A](usersToken.userId, usersToken.appId, appKey, request))
+                  block(new UserRequest[A](usersToken.userId, usersToken.appId, appKey, usersToken.token, request))
                 }
                 else
                   Future.successful(Results.Unauthorized(JsonErrors.AccessTokenIsNotValid))

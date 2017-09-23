@@ -49,8 +49,7 @@ class AuthController @Inject() (userDAO: UserDAO, usersApiTokenDAO: UsersApiToke
   }
 
   def logout() = actions.AuthAction.async { request =>
-    for {_ <- usersApiTokenDAO.removeUserAppToken(request.appId, request.userId,
-      request.baseRequest.headers.apply(Actions.AccessTokenHeaderName))
+    for {_ <- usersApiTokenDAO.removeUserAppToken(request.appId, request.userId, request.accessToken)
     } yield NoContent
   }
 }

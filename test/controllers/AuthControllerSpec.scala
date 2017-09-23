@@ -1,7 +1,6 @@
 package controllers
 
 import models.UsersApiTokenDAO
-import org.scalatest.concurrent.{Futures, ScalaFutures}
 import play.api.test._
 import play.api.test.Helpers._
 import test.{BaseSpec, FutureTest}

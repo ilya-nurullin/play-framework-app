@@ -12,7 +12,7 @@ import scala.concurrent.Future
 class LastSyncIdHelperSpec extends BaseSpec with FutureTest with Results {
   "LastSyncIdHelper" should {
     val helper = app.injector.instanceOf[LastSyncIdHelper]
-    val fakeRequest = new UserRequest(1, 1, "asda", FakeRequest())
+    val fakeRequest = new UserRequest(1, 1, "asda", "firebaseToken", FakeRequest())
     val result = Ok("ok")
 
     "Create new syncId if not exists" in {
