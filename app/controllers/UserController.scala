@@ -63,70 +63,67 @@ class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient:
 
   }
 
-  def update(userId: Int) = AuthAction.async { implicit request =>
-    Actions.filterOnlyObjectOwnerAllowed(userId) {
+  def update() = AuthAction.async { implicit request =>
+    val userId: Int = request.userId
 
-      val jsonUser = Form(
-        mapping(
-          "login" -> nonEmptyText,
-          "email" -> email,
-          "name" -> optional(nonEmptyText),
-          "avatar" -> optional(nonEmptyText),
-          "aboutMyself" -> optional(text),
-          "dateOfBirth" -> optional(text),
-          "sex" -> optional(boolean),
-          "cityId" -> optional(number)
-        )(UserToUpdate.apply)(UserToUpdate.unapply)
-      )
+    val jsonUser = Form(
+      mapping(
+        "login" -> nonEmptyText,
+        "email" -> email,
+        "name" -> optional(nonEmptyText),
+        "avatar" -> optional(nonEmptyText),
+        "aboutMyself" -> optional(text),
+        "dateOfBirth" -> optional(text),
+        "sex" -> optional(boolean),
+        "cityId" -> optional(number)
+      )(UserToUpdate.apply)(UserToUpdate.unapply)
+    )
 
-      jsonUser.bindFromRequest.fold (
-        formWithErrors => {
-          val errors = formWithErrors.errors.foldLeft(Map[String, String]()) { (m, e) => m + (e.key -> e.message) }
-          Future.successful(BadRequest(JsonErrors.BadData(Json.toJson(errors))))
-        },
-        userData => {
-          userDAO.update(userId, userData.login, userData.email, userData.name, userData.avatar, userData.aboutMyself,
-            userData.dateOfBirth.map(DateHelper.sqlDateStringToDate), userData.sex, userData.cityId).map { user =>
+    jsonUser.bindFromRequest.fold(
+      formWithErrors => {
+        val errors = formWithErrors.errors.foldLeft(Map[String, String]()) { (m, e) => m + (e.key -> e.message) }
+        Future.successful(BadRequest(JsonErrors.BadData(Json.toJson(errors))))
+      },
+      userData => {
+        userDAO.update(userId, userData.login, userData.email, userData.name, userData.avatar, userData.aboutMyself,
+          userData.dateOfBirth.map(DateHelper.sqlDateStringToDate), userData.sex, userData.cityId).map { user =>
 
-            val jsonUser = Json.toJson(FullUserJson(user.id, user.login, user.name, user.avatar, user.aboutMyself, user.sex,
-              user.cityId, user.userRankId, user.isBanned))
-            Ok(jsonUser)
+          val jsonUser = Json.toJson(FullUserJson(user.id, user.login, user.name, user.avatar, user.aboutMyself, user.sex,
+            user.cityId, user.userRankId, user.isBanned))
+          Ok(jsonUser)
 
-          }.recover {
-            case e: java.sql.SQLIntegrityConstraintViolationException =>
-              if (e.getMessage.toUpperCase.contains("LOGIN_UNIQUE"))
-                BadRequest(JsonErrors.LoginDuplication)
-              else if (e.getMessage.toUpperCase.contains("EMAIL_UNIQUE"))
-                BadRequest(JsonErrors.EmailDuplication)
-              else
-                throw e
-          }
+        }.recover {
+          case e: java.sql.SQLIntegrityConstraintViolationException =>
+            if (e.getMessage.toUpperCase.contains("LOGIN_UNIQUE"))
+              BadRequest(JsonErrors.LoginDuplication)
+            else if (e.getMessage.toUpperCase.contains("EMAIL_UNIQUE"))
+              BadRequest(JsonErrors.EmailDuplication)
+            else
+              throw e
         }
-      )
-
-    }
+      }
+    )
   }
 
-  def changePassword(userId: Int) = actions.AuthAction.async { implicit request =>
-    Actions.filterOnlyObjectOwnerAllowed(userId) {
-      val jsonRequest = Form(
-        tuple(
-          "oldPassword" -> nonEmptyText(6),
-          "newPassword" -> nonEmptyText(6)
-        )
+  def changePassword() = actions.AuthAction.async { implicit request =>
+    val userId: Int = request.userId
+    val jsonRequest = Form(
+      tuple(
+        "oldPassword" -> nonEmptyText(6),
+        "newPassword" -> nonEmptyText(6)
       )
+    )
 
-      JsonFormHelper.asyncJsonForm(jsonRequest) { passTuple =>
-        userDAO.getById(userId).flatMap { userOpt =>
-          val user = userOpt.get
-          if (BCrypt.checkpw(passTuple._1, user.passHash)) {
-            userDAO.changePassword(userId, BCrypt.hashpw(passTuple._2, BCrypt.gensalt())).map { _ =>
-              NoContent
-            }
+    JsonFormHelper.asyncJsonForm(jsonRequest) { passTuple =>
+      userDAO.getById(userId).flatMap { userOpt =>
+        val user = userOpt.get
+        if (BCrypt.checkpw(passTuple._1, user.passHash)) {
+          userDAO.changePassword(userId, BCrypt.hashpw(passTuple._2, BCrypt.gensalt())).map { _ =>
+            NoContent
           }
-          else
-            Future.successful(Forbidden(JsonErrors.WrongPassword))
         }
+        else
+          Future.successful(Forbidden(JsonErrors.WrongPassword))
       }
     }
   }

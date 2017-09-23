@@ -86,9 +86,7 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
     "PUT" should {
       val controller = app.injector.instanceOf[UserController]
 
-      behave like authAction(controller.update(1))
-
-      behave like filterOnlyObjectOwnerAllowed(controller.update(1), controller.update(2))
+      behave like authAction(controller.update())
 
       "Change all user fields in DB and response updated user" in {
         val newEmail = "newemail@testdomain.test"
@@ -100,7 +98,7 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
         val newSex = true
         val newCityId = 1
 
-        val updateMethod = controller.update(1).apply(fakeRequestWithRightAuthHeaders.withJsonBody(Json.obj(
+        val updateMethod = controller.update().apply(fakeRequestWithRightAuthHeaders.withJsonBody(Json.obj(
           "email" -> newEmail,
           "login" -> newLogin,
           "name" -> newName,
@@ -133,7 +131,7 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
       }
 
       "Show error on error in email" in {
-        val updateMethodEmailError = controller.update(1).apply(fakeRequestWithRightAuthHeaders.withJsonBody(Json.obj(
+        val updateMethodEmailError = controller.update().apply(fakeRequestWithRightAuthHeaders.withJsonBody(Json.obj(
           "email" -> "newEmail",
           "login" -> "newLogin"
         )))
@@ -146,12 +144,12 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
 
       "Show error on unique fields duplication" in {
         import errorJsonBodies.JsonErrors
-        val updateMethodEmailDuplication = controller.update(1).apply(fakeRequestWithRightAuthHeaders.withJsonBody(Json.obj(
+        val updateMethodEmailDuplication = controller.update().apply(fakeRequestWithRightAuthHeaders.withJsonBody(Json.obj(
           "email" -> "testemail@testdomain.test",
           "login" -> "newLogin"
         )))
 
-        val updateMethodLoginDuplication = controller.update(1).apply(fakeRequestWithRightAuthHeaders.withJsonBody(Json.obj(
+        val updateMethodLoginDuplication = controller.update().apply(fakeRequestWithRightAuthHeaders.withJsonBody(Json.obj(
           "email" -> "newemail@testdomain.test",
           "login" -> "id2"
         )))
@@ -167,16 +165,14 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
     "Change password" should {
       val controller = app.injector.instanceOf[UserController]
 
-      behave like authAction(controller.changePassword(1))
-
-      behave like filterOnlyObjectOwnerAllowed(controller.changePassword(1), controller.changePassword(2))
+      behave like authAction(controller.changePassword())
 
       "Change password" in {
         val jsonRequest = Json.obj(
           "oldPassword" -> "testPassword",
           "newPassword" -> "newPass"
         )
-        val changeMethod = controller.changePassword(1).apply(fakeRequestWithRightAuthHeaders.withJsonBody(jsonRequest))
+        val changeMethod = controller.changePassword().apply(fakeRequestWithRightAuthHeaders.withJsonBody(jsonRequest))
 
         status(changeMethod) mustBe NO_CONTENT
 
@@ -195,7 +191,7 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
           "oldPassword" -> "testPassword",
           "newPassword" -> "newPass"
         )
-        val changeMethod = controller.changePassword(1).apply(fakeRequestWithRightAuthHeaders.withJsonBody(jsonRequest))
+        val changeMethod = controller.changePassword().apply(fakeRequestWithRightAuthHeaders.withJsonBody(jsonRequest))
 
         status(changeMethod) mustBe FORBIDDEN
       }

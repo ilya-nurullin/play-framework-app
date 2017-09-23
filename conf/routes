@@ -16,8 +16,8 @@ GET       /last_sync_id                 controllers.SyncController.lastSyncId
 
 GET       /users/:id                    controllers.UserController.get(id: Int)
 POST      /users                        controllers.UserController.create
-PUT       /users/:id                    controllers.UserController.update(id: Int)
-PUT       /users/:id/password           controllers.UserController.changePassword(id: Int)
+PUT       /users/me                   controllers.UserController.update
+PUT       /users/me/password           controllers.UserController.changePassword
 PUT       /users/me/default_project     controllers.UserController.changeDefaultProject
 
 GET       /tasks                        controllers.TaskController.getLatestTasks(start_with: Long ?= 0)
