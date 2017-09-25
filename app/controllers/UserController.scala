@@ -16,12 +16,14 @@ import play.api.i18n.{I18nSupport, Messages}
 
 import scala.concurrent.{ExecutionContext, Future}
 import json.implicits.formats.DateJsonFormat._
+import org.joda.time.DateTime
 
 @Singleton
 class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient: MailerClient,
                                 usersApiTokenDAO: UsersApiTokenDAO, projectDAO: ProjectDAO, taskDAO: TaskDAO)
                               (implicit ec: ExecutionContext)
     extends InjectedController with I18nSupport {
+
   val AuthAction = actions.AuthAction
   implicit val fullUserFormat = Json.format[FullUserJson]
 
@@ -29,7 +31,7 @@ class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient:
     userDAO.getById(id).map { userOpt =>
       userOpt.map { user =>
         val jsonUser = Json.toJson(FullUserJson(user.id, user.login, user.name, user.avatar, user.aboutMyself, user.sex,
-          user.cityId, user.userRankId, user.isBanned))
+          user.cityId, user.statuses, user.userRankId, user.premiumUntil, user.isBanned, user.defaultProject))
 
         Ok(jsonUser)
       } getOrElse NotFound(JsNull)
@@ -89,7 +91,7 @@ class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient:
           userData.dateOfBirth.map(DateHelper.sqlDateStringToDate), userData.sex, userData.cityId).map { user =>
 
           val jsonUser = Json.toJson(FullUserJson(user.id, user.login, user.name, user.avatar, user.aboutMyself, user.sex,
-            user.cityId, user.userRankId, user.isBanned))
+            user.cityId, user.statuses, user.userRankId, user.premiumUntil, user.isBanned, user.defaultProject))
           Ok(jsonUser)
 
         }.recover {
@@ -155,8 +157,11 @@ class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient:
                            aboutMyself: Option[String],
                            sex: Option[Boolean],
                            cityId: Option[Int],
+                           statuses: Option[String],
                            userRankId: Int,
-                           isBanned: Boolean
+                           premiumUntil: Option[DateTime],
+                           isBanned: Boolean,
+                           defaultProject: Option[Long]
                          )
 
   case class UserToUpdate(

@@ -193,8 +193,8 @@ CREATE TABLE IF NOT EXISTS `users` (
 -- Дамп данных таблицы whipcake.users: ~2 rows (приблизительно)
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` (`id`, `login`, `email`, `pass_hash`, `name`, `avatar`, `about_myself`, `date_of_birth`, `sex`, `created_at`, `updated_at`, `city_id`, `statuses`, `user_rank_id`, `premium_until`, `is_banned`, `soc_networks`, `default_project`) VALUES
-  (1, 'testLogin', 'test', '$2a$10$gZtzxmt1KJICEFFLZdyMDefn8Cmc2hoE9c0oBhp5dlWEfJ9y5enyi' /*PASS: testPassword*/, 'testName', 'testAva', NULL, NULL, NULL, '2017-05-01 21:10:14', '2017-06-15 22:37:07', NULL, NULL, 1, NULL, 0, NULL, 1),
-  (2, 'id2', 'testemail@testdomain.test', '$2a$10$ExnMSd2gA.oeMebTAcq9iujqSbKfLVoWwJEH/RJWP6LahRULm1/Hi', NULL, NULL, NULL, NULL, NULL, '2017-05-20 21:28:57', '2017-05-20 21:28:58', NULL, NULL, 1, NULL, 0, NULL, 2);
+  (1, 'testLogin', 'test', '$2a$10$gZtzxmt1KJICEFFLZdyMDefn8Cmc2hoE9c0oBhp5dlWEfJ9y5enyi' /*PASS: testPassword*/, 'testName', 'testAva', 'testAboutMyself', NULL, FALSE, '2017-05-01 21:10:14', '2017-06-15 22:37:07', 1, '["testStatus"]', 1, '2017-05-01 21:10:14', 0, NULL, 1),
+  (2, 'id2', 'testemail@testdomain.test', '$2a$10$ExnMSd2gA.oeMebTAcq9iujqSbKfLVoWwJEH/RJWP6LahRULm1/Hi', NULL, NULL, NULL, NULL, TRUE, '2017-05-20 21:28:57', '2017-05-20 21:28:58', NULL, NULL, 1, NULL, 0, NULL, 2);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 
 -- Дамп структуры для таблица whipcake.users_has_api_tokens

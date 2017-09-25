@@ -21,6 +21,15 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
 
         (json \ "id").as[Int] mustBe 1
         (json \ "login").as[String] mustBe "testLogin"
+        (json \ "name").as[String] mustBe "testName"
+        (json \ "avatar").as[String] mustBe "testAva"
+        (json \ "aboutMyself").as[String] mustBe "testAboutMyself"
+        (json \ "sex").as[Boolean] mustBe false
+        (json \ "statuses").as[String] mustBe "[\"testStatus\"]"
+        (json \ "userRankId").as[Int] mustBe 1
+        (json \ "premiumUntil").as[String] mustBe "2017-05-01T21:10:14+0000"
+        (json \ "isBanned").as[Boolean] mustBe false
+        (json \ "defaultProject").as[Int] mustBe 1
       }
 
       "Response 200 OK with JSON object of user without passHash" in {
