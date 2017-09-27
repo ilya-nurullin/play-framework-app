@@ -14,6 +14,7 @@ POST      /reg/oauth                    controllers.OAuthController.registration
 
 GET       /last_sync_id                 controllers.SyncController.lastSyncId
 
+GET       /users/me                     controllers.UserController.getMe
 GET       /users/:id                    controllers.UserController.get(id: Int)
 POST      /users                        controllers.UserController.create
 PUT       /users/me                     controllers.UserController.update

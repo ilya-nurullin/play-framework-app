@@ -48,6 +48,12 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
         contentType(getMethod) mustBe Some("application/json")
         contentAsJson(getMethod) mustBe JsNull
       }
+
+      "Get me" in {
+        val method = controller.getMe.apply(fakeRequestWithRightAuthHeaders)
+        status(method) mustBe OK
+        (contentAsJson(method) \ "id").as[Int] mustBe 1
+      }
     }
 
     "POST" should {

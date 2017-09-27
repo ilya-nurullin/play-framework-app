@@ -38,6 +38,10 @@ class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient:
     }
   }
 
+  def getMe() = AuthAction.async { request =>
+    get(request.userId).apply(request)
+  }
+
   def create() = actions.AppIdFilterAction.async { implicit request =>
     val jsonRequest = Form(
       tuple(
