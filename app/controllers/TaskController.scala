@@ -5,7 +5,7 @@ import javax.inject._
 import actions.Actions
 import errorJsonBodies.JsonErrors
 import helpers.{JsonFormHelper, LastSyncIdHelper}
-import json.implicits.formats.DateJsonFormat
+import json.implicits.formats.DateTimeJsonFormat
 import models.{ProjectDAO, TaskDAO}
 import org.joda.time.DateTime
 import play.api.data.Forms._
@@ -45,7 +45,7 @@ class TaskController @Inject()(actions: Actions, taskDAO: TaskDAO, projectDAO: P
           "title" -> nonEmptyText,
           "projectId" -> longNumber,
           "description" -> optional(nonEmptyText),
-          "deadline" -> optional(jodaDate(DateJsonFormat.format)),
+          "deadline" -> optional(jodaDate(DateTimeJsonFormat.dateTimeFormat)),
           "importance" -> optional(number(0, 100)),
           "complexity" -> optional(number(0, 100)),
           "isOpenForSurety" -> boolean,
@@ -82,7 +82,7 @@ class TaskController @Inject()(actions: Actions, taskDAO: TaskDAO, projectDAO: P
             "title" -> nonEmptyText,
             "projectId" -> longNumber,
             "description" -> optional(nonEmptyText),
-            "deadline" -> optional(jodaDate(DateJsonFormat.format)),
+            "deadline" -> optional(jodaDate(DateTimeJsonFormat.dateTimeFormat)),
             "importance" -> optional(number(0, 100)),
             "complexity" -> optional(number(0, 100)),
             "isOpenForSurety" -> boolean,

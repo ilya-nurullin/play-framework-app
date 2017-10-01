@@ -1,6 +1,6 @@
 package controllers
 
-import json.implicits.formats.DateJsonFormat
+import json.implicits.formats.DateTimeJsonFormat
 import org.joda.time.DateTime
 import play.api.libs.json.{JsArray, Json}
 import play.api.test.Helpers._
@@ -56,7 +56,7 @@ class TaskControllerSpec  extends BaseSpec with AuthActionBehaviors with FutureT
           "title" -> "NewTask",
           "projectId" -> 1,
           "description" -> "new Desc",
-          "deadline" -> DateTime.now().toString(DateJsonFormat.format),
+          "deadline" -> DateTime.now().toString(DateTimeJsonFormat.dateTimeFormat),
           "importance" -> 1,
           "complexity" -> 6,
           "isOpenForSurety" -> true,
@@ -84,7 +84,7 @@ class TaskControllerSpec  extends BaseSpec with AuthActionBehaviors with FutureT
           "title" -> "NewTask",
           "projectId" -> 2,
           "description" -> "new Desc",
-          "deadline" -> DateTime.now().toString(DateJsonFormat.format),
+          "deadline" -> DateTime.now().toString(DateTimeJsonFormat.dateTimeFormat),
           "importance" -> 1,
           "complexity" -> 6,
           "data" -> Json.obj("tags" -> Json.arr(Seq("tag1", "tag2")))
@@ -111,7 +111,7 @@ class TaskControllerSpec  extends BaseSpec with AuthActionBehaviors with FutureT
           "title" -> "Updated NewTask",
           "projectId" -> 1,
           "description" -> "Updated new Desc",
-          "deadline" -> DateTime.now().toString(DateJsonFormat.format),
+          "deadline" -> DateTime.now().toString(DateTimeJsonFormat.dateTimeFormat),
           "importance" -> 3,
           "complexity" -> 7,
           "isOpenForSurety" -> false,
@@ -139,7 +139,7 @@ class TaskControllerSpec  extends BaseSpec with AuthActionBehaviors with FutureT
           "title" -> "Updated NewTask",
           "projectId" -> 2,
           "description" -> "Updated new Desc",
-          "deadline" -> DateTime.now().toString(DateJsonFormat.format),
+          "deadline" -> DateTime.now().toString(DateTimeJsonFormat.dateTimeFormat),
           "importance" -> 3,
           "complexity" -> 7,
           "data" -> Json.obj("tags" -> Json.arr(Seq("tag3", "tag4")))
@@ -164,7 +164,7 @@ class TaskControllerSpec  extends BaseSpec with AuthActionBehaviors with FutureT
           "title" -> "NewTask",
           "projectId" -> 1,
           "description" -> "new Desc",
-          "deadline" -> DateTime.now().toString(DateJsonFormat.format),
+          "deadline" -> DateTime.now().toString(DateTimeJsonFormat.dateTimeFormat),
           "importance" -> 1,
           "complexity" -> 6,
           "data" -> Json.obj("tags" -> Json.arr(Seq("tag1", "tag2")))

@@ -1,9 +1,12 @@
 package json.implicits.formats
 
+import java.sql.Date
+
+import helpers.DateHelper
 import play.api.libs.json._
 
 object DateJsonFormat {
-  val format = "yyyy-MM-dd'T'HH:mm:ssZ"
-  implicit val dateWrites = JodaWrites.jodaDateWrites(format)
-  implicit val dateReads = JodaReads.jodaDateReads(format)
+  val format = DateHelper.pattern
+  implicit val dateWrites = Reads[Date](js => JsSuccess(DateHelper.sqlDateStringToDate(js.asInstanceOf[JsString].value)))
+  implicit val dateReads = Writes[Date](date => JsString(date.toString()))
 }

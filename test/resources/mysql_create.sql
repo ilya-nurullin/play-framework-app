@@ -179,6 +179,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `is_banned` tinyint(1) NOT NULL DEFAULT '0',
   `soc_networks` json DEFAULT NULL,
   `default_project` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
+  `can_be_guarantor` TINYINT(1) UNSIGNED NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `login_UNIQUE` (`login`),
   UNIQUE KEY `email_UNIQUE` (`email`),

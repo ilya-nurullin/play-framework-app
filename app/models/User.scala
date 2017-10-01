@@ -21,7 +21,7 @@ case class User(id: Int, login: String, email: String, passHash: String, name: O
                 sex: Option[Boolean] = None, createdAt: DateTime, updatedAt: DateTime,
                 cityId: Option[Int] = None, statuses: Option[String] = None, userRankId: Int,
                 premiumUntil: Option[DateTime] = None, isBanned: Boolean = false, socNetworks: Option[JsArray] = None,
-                defaultProject: Option[Long] = None)
+                defaultProject: Option[Long] = None, canBeGuarantor: Boolean)
 
 class UsersTable(tag: Tag) extends Table[User](tag, "users") with JsArrayMappedColumn {
 
@@ -43,9 +43,10 @@ class UsersTable(tag: Tag) extends Table[User](tag, "users") with JsArrayMappedC
   def isBanned = column[Boolean]("is_banned")
   def socNetworks = column[Option[JsArray]]("soc_networks")
   def defaultProject = column[Option[Long]]("default_project")
+  def canBeGuarantor = column[Boolean]("can_be_guarantor")
 
   def * = (id, login, email, passHash, name, avatar, aboutMyself, dateOfBirth, sex, createdAt, updatedAt, cityId, statuses,
-    userRankId, premiumUntil, isBanned, socNetworks, defaultProject) <> ( User.tupled, User.unapply)
+    userRankId, premiumUntil, isBanned, socNetworks, defaultProject, canBeGuarantor) <> ( User.tupled, User.unapply)
 }
 
 @Singleton
@@ -87,7 +88,7 @@ class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: E
         if (!exists)
           for {
             id <- (users returning users.map(_.id)) += User(0, login, email, passHash, userRankId = 1,
-              createdAt = DateTime.now(), updatedAt = DateTime.now())
+              createdAt = DateTime.now(), updatedAt = DateTime.now(), canBeGuarantor = true)
             _ <- users.filter(_.login === login).map(_.login).update("id" + id)
           } yield id
         else
@@ -97,10 +98,14 @@ class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: E
   }
 
   def update(userId: Int, login: String, email: String, name: Option[String], avatar: Option[String],
-             aboutMyself: Option[String], dateOfBirth: Option[Date], sex: Option[Boolean], cityId: Option[Int]) = {
+             aboutMyself: Option[String], dateOfBirth: Option[Date], sex: Option[Boolean], cityId: Option[Int],
+             canBeGuarantor: Boolean) = {
     dbConfig.db.run {
       users.filter(_.id === userId).map(r => (r.login, r.email, r.name, r.avatar, r.aboutMyself, r.dateOfBirth, r.sex,
-        r.cityId)).update((login, email, name, avatar, aboutMyself, dateOfBirth, sex, cityId)) >>
+        r.cityId, r.canBeGuarantor))
+      .update(
+        (login, email, name, avatar, aboutMyself, dateOfBirth, sex, cityId, canBeGuarantor)
+      ) >>
       users.filter(_.id === userId).take(1).result.head
     }
   }

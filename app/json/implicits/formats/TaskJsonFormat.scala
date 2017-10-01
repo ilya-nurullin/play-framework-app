@@ -4,7 +4,7 @@ import models.Task
 import play.api.libs.json._
 
 object TaskJsonFormat {
-  import DateJsonFormat._
+  import DateTimeJsonFormat._
 
   implicit val taskReads: Reads[Task] = Json.reads[Task]
 

@@ -5,7 +5,7 @@ import javax.inject._
 import actions.Actions
 import errorJsonBodies.JsonErrors
 import helpers.JsonFormHelper
-import json.implicits.formats.DateJsonFormat._
+import json.implicits.formats.DateTimeJsonFormat._
 import models.{UserDAO, UsersApiTokenDAO}
 import oauth._
 import play.api.data.Forms._
@@ -21,7 +21,7 @@ class AuthController @Inject() (userDAO: UserDAO, usersApiTokenDAO: UsersApiToke
     extends InjectedController {
 
   def emailAuth() = actions.AppIdFilterAction.async { implicit request =>
-    import json.implicits.formats.DateJsonFormat._
+    import json.implicits.formats.DateTimeJsonFormat._
     import org.mindrot.jbcrypt.BCrypt
 
     val jsonRequest = Form(

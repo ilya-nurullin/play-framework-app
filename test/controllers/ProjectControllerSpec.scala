@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import play.api.libs.json.{JsArray, Json}
 import play.api.test.Helpers._
 import test._
-import json.implicits.formats.DateJsonFormat._
+import json.implicits.formats.DateTimeJsonFormat._
 
 class ProjectControllerSpec extends BaseSpec with AuthActionBehaviors {
 

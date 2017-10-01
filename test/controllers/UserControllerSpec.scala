@@ -112,6 +112,7 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
         val newDateOfBirth = "2017-04-01"
         val newSex = true
         val newCityId = 1
+        val canBeGuarantor = false
 
         val updateMethod = controller.update().apply(fakeRequestWithRightAuthHeaders.withJsonBody(Json.obj(
           "email" -> newEmail,
@@ -121,7 +122,8 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
           "aboutMyself" -> newAboutMyself,
           "dateOfBirth" -> newDateOfBirth,
           "sex" -> newSex,
-          "cityId" -> newCityId
+          "cityId" -> newCityId,
+          "canBeGuarantor" -> canBeGuarantor
         )))
 
         status(updateMethod) mustBe OK
@@ -130,6 +132,9 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
         (jsonResponse \ "name").as[String] mustBe newName
         (jsonResponse \ "avatar").as[String] mustBe newAvatar
         (jsonResponse \ "cityId").as[Int] mustBe newCityId
+        (jsonResponse \ "dateOfBirth").as[String] mustBe newDateOfBirth
+        (jsonResponse \ "sex").as[Boolean] mustBe newSex
+        (jsonResponse \ "canBeGuarantor").as[Boolean] mustBe canBeGuarantor
 
         whenReady(app.injector.instanceOf[UserDAO].getById(1)) { userOpt =>
           userOpt.isDefined mustBe true
@@ -148,7 +153,8 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
       "Show error on error in email" in {
         val updateMethodEmailError = controller.update().apply(fakeRequestWithRightAuthHeaders.withJsonBody(Json.obj(
           "email" -> "newEmail",
-          "login" -> "newLogin"
+          "login" -> "newLogin",
+          "canBeGuarantor" -> true
         )))
 
         status(updateMethodEmailError) mustBe BAD_REQUEST
@@ -161,12 +167,14 @@ class UserControllerSpec extends BaseSpec with AuthActionBehaviors with FutureTe
         import errorJsonBodies.JsonErrors
         val updateMethodEmailDuplication = controller.update().apply(fakeRequestWithRightAuthHeaders.withJsonBody(Json.obj(
           "email" -> "testemail@testdomain.test",
-          "login" -> "newLogin"
+          "login" -> "newLogin",
+          "canBeGuarantor" -> true
         )))
 
         val updateMethodLoginDuplication = controller.update().apply(fakeRequestWithRightAuthHeaders.withJsonBody(Json.obj(
           "email" -> "newemail@testdomain.test",
-          "login" -> "id2"
+          "login" -> "id2",
+          "canBeGuarantor" -> true
         )))
 
         status(updateMethodEmailDuplication) mustBe BAD_REQUEST

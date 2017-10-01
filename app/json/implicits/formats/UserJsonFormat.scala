@@ -4,7 +4,7 @@ import models.User
 import play.api.libs.json._
 
 object UserJsonFormat {
-  import DateJsonFormat._
+  import DateTimeJsonFormat._
 
   implicit val userReads: Reads[User] = Json.reads[User]
 

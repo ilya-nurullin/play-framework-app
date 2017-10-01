@@ -4,7 +4,7 @@ import models.Project
 import play.api.libs.json.{Format, Json, Reads, Writes}
 
 object ProjectJsonFormat {
-  import DateJsonFormat._
+  import DateTimeJsonFormat._
 
   implicit val projectReads: Reads[Project] = Json.reads[Project]
 

@@ -4,8 +4,8 @@ import javax.inject._
 
 import actions.Actions
 import errorJsonBodies.JsonErrors
-import helpers.{DateHelper, JsonFormHelper}
-import models.{ProjectDAO, TaskDAO, UserDAO, UsersApiTokenDAO}
+import helpers.JsonFormHelper
+import models._
 import play.api.data.Forms._
 import play.api.data._
 import play.api.libs.json._
@@ -15,7 +15,9 @@ import org.mindrot.jbcrypt.BCrypt
 import play.api.i18n.{I18nSupport, Messages}
 
 import scala.concurrent.{ExecutionContext, Future}
+import json.implicits.formats.DateTimeJsonFormat._
 import json.implicits.formats.DateJsonFormat._
+
 import org.joda.time.DateTime
 
 @Singleton
@@ -30,8 +32,7 @@ class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient:
   def get(id: Int) = AuthAction.async {
     userDAO.getById(id).map { userOpt =>
       userOpt.map { user =>
-        val jsonUser = Json.toJson(FullUserJson(user.id, user.login, user.name, user.avatar, user.aboutMyself, user.sex,
-          user.cityId, user.statuses, user.userRankId, user.premiumUntil, user.isBanned, user.defaultProject))
+        val jsonUser = Json.toJson(userRow2FullJsonUser(user))
 
         Ok(jsonUser)
       } getOrElse NotFound(JsNull)
@@ -70,6 +71,8 @@ class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient:
   }
 
   def update() = AuthAction.async { implicit request =>
+    import helpers.CustomFormMapping.requiredBoolean
+
     val userId: Int = request.userId
 
     val jsonUser = Form(
@@ -79,36 +82,31 @@ class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient:
         "name" -> optional(nonEmptyText),
         "avatar" -> optional(nonEmptyText),
         "aboutMyself" -> optional(text),
-        "dateOfBirth" -> optional(text),
+        "dateOfBirth" -> optional(sqlDate),
         "sex" -> optional(boolean),
-        "cityId" -> optional(number)
+        "cityId" -> optional(number),
+        "canBeGuarantor" -> requiredBoolean,
       )(UserToUpdate.apply)(UserToUpdate.unapply)
     )
 
-    jsonUser.bindFromRequest.fold(
-      formWithErrors => {
-        val errors = formWithErrors.errors.foldLeft(Map[String, String]()) { (m, e) => m + (e.key -> e.message) }
-        Future.successful(BadRequest(JsonErrors.BadData(Json.toJson(errors))))
-      },
-      userData => {
-        userDAO.update(userId, userData.login, userData.email, userData.name, userData.avatar, userData.aboutMyself,
-          userData.dateOfBirth.map(DateHelper.sqlDateStringToDate), userData.sex, userData.cityId).map { user =>
+    JsonFormHelper.asyncJsonForm(jsonUser) { userData =>
+      userDAO.update(userId, userData.login, userData.email, userData.name, userData.avatar, userData.aboutMyself,
+        userData.dateOfBirth, userData.sex, userData.cityId, userData.canBeGuarantor
+      ).map { user =>
 
-          val jsonUser = Json.toJson(FullUserJson(user.id, user.login, user.name, user.avatar, user.aboutMyself, user.sex,
-            user.cityId, user.statuses, user.userRankId, user.premiumUntil, user.isBanned, user.defaultProject))
-          Ok(jsonUser)
+        val jsonUser = Json.toJson(userRow2FullJsonUser(user))
+        Ok(jsonUser)
 
-        }.recover {
-          case e: java.sql.SQLIntegrityConstraintViolationException =>
-            if (e.getMessage.toUpperCase.contains("LOGIN_UNIQUE"))
-              BadRequest(JsonErrors.LoginDuplication)
-            else if (e.getMessage.toUpperCase.contains("EMAIL_UNIQUE"))
-              BadRequest(JsonErrors.EmailDuplication)
-            else
-              throw e
-        }
+      }.recover {
+        case e: java.sql.SQLIntegrityConstraintViolationException =>
+          if (e.getMessage.toUpperCase.contains("LOGIN_UNIQUE"))
+            BadRequest(JsonErrors.LoginDuplication)
+          else if (e.getMessage.toUpperCase.contains("EMAIL_UNIQUE"))
+            BadRequest(JsonErrors.EmailDuplication)
+          else
+            throw e
       }
-    )
+    }
   }
 
   def changePassword() = actions.AuthAction.async { implicit request =>
@@ -152,6 +150,10 @@ class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient:
     }
   }
 
+  def userRow2FullJsonUser(user: User) = FullUserJson(user.id, user.login, user.name, user.avatar, user.aboutMyself,
+    user.dateOfBirth, user.sex, user.cityId, user.statuses, user.userRankId, user.premiumUntil, user.isBanned, user.defaultProject,
+    user.canBeGuarantor)
+
 
   case class FullUserJson(
                            id: Int,
@@ -159,13 +161,15 @@ class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient:
                            name: Option[String],
                            avatar: Option[String],
                            aboutMyself: Option[String],
+                           dateOfBirth: Option[java.sql.Date],
                            sex: Option[Boolean],
                            cityId: Option[Int],
                            statuses: Option[String],
                            userRankId: Int,
                            premiumUntil: Option[DateTime],
                            isBanned: Boolean,
-                           defaultProject: Option[Long]
+                           defaultProject: Option[Long],
+                           canBeGuarantor: Boolean
                          )
 
   case class UserToUpdate(
@@ -174,8 +178,9 @@ class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient:
                            name: Option[String],
                            avatar: Option[String],
                            aboutMyself: Option[String],
-                           dateOfBirth: Option[String],
+                           dateOfBirth: Option[java.sql.Date],
                            sex: Option[Boolean],
-                           cityId: Option[Int]
+                           cityId: Option[Int],
+                           canBeGuarantor: Boolean,
                          )
 }
