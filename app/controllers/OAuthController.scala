@@ -4,7 +4,7 @@ import javax.inject._
 
 import actions.Actions
 import errorJsonBodies.JsonErrors
-import helpers.JsonFormHelper
+import helpers.{JsonFormHelper, UserRegistration}
 import models._
 import oauth._
 import play.api.data._
@@ -18,7 +18,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class OAuthController @Inject() (actions: Actions, userHasSocialNetworkDAO: UserHasSocialNetworkDAO,
                                  oAuthChecker: OAuthChecker, userDAO: UserDAO, usersApiTokenDAO: UsersApiTokenDAO,
-                                 projectDAO: ProjectDAO, taskDAO: TaskDAO)
+                                 projectDAO: ProjectDAO, taskDAO: TaskDAO, userRegistration: UserRegistration)
                                 (implicit ec: ExecutionContext)
 extends InjectedController with I18nSupport {
 
@@ -58,7 +58,7 @@ extends InjectedController with I18nSupport {
                       _ <- userHasSocialNetworkDAO.addSocialNetworkToUser(UserHasSocialNetwork(userId, networkName, userNetworkId, emailOpt))
                       whipcakeTokenTuple <- usersApiTokenDAO.generateToken(request.appId, userId, firebaseToken)
                     } yield {
-                      projectDAO.createDefaultProject(userId).map(taskDAO.createGreetingTasks(userId, _))
+                      userRegistration.performRegistrationSetup(userId)
                       Ok(Json.obj("token" -> whipcakeTokenTuple._1, "userId" -> userId))
                     }
                   }

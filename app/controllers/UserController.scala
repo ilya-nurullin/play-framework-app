@@ -4,7 +4,7 @@ import javax.inject._
 
 import actions.Actions
 import errorJsonBodies.JsonErrors
-import helpers.JsonFormHelper
+import helpers.{JsonFormHelper, UserRegistration}
 import models._
 import play.api.data.Forms._
 import play.api.data._
@@ -17,12 +17,12 @@ import play.api.i18n.{I18nSupport, Messages}
 import scala.concurrent.{ExecutionContext, Future}
 import json.implicits.formats.DateTimeJsonFormat._
 import json.implicits.formats.DateJsonFormat._
-
 import org.joda.time.DateTime
 
 @Singleton
 class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient: MailerClient,
-                                usersApiTokenDAO: UsersApiTokenDAO, projectDAO: ProjectDAO, taskDAO: TaskDAO)
+                                usersApiTokenDAO: UsersApiTokenDAO, projectDAO: ProjectDAO, taskDAO: TaskDAO,
+                               userRegistration: UserRegistration)
                               (implicit ec: ExecutionContext)
     extends InjectedController with I18nSupport {
 
@@ -59,7 +59,7 @@ class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient:
             Some(Messages("registration.email.body"))))
           usersApiTokenDAO.generateToken(request.appId, userId, firebaseToken).map {
             case (token, _) =>
-              projectDAO.createDefaultProject(userId).map(taskDAO.createGreetingTasks(userId, _))
+              userRegistration.performRegistrationSetup(userId)
               Ok(Json.obj("token" -> token, "userId" -> userId)).withHeaders("Location" -> routes.UserController.get(userId).url)
             case _ => Ok(JsNull)
           }
