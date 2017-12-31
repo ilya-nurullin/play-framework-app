@@ -9,6 +9,7 @@ import play.api.test.FakeRequest
 
 abstract class BaseSpec extends PlaySpec with GuiceOneAppPerSuite {
   val rightAccessToken = "PjdSyBX62WSq8b1IEOEFMfsjBYZcpP"
+  val rightAccessToken2 = "2"
   val rightAppKey = "1"
 
   val fakeRequestWithRightAppKeyHeader = FakeRequest().withHeaders("App-key" -> rightAppKey)
@@ -16,6 +17,9 @@ abstract class BaseSpec extends PlaySpec with GuiceOneAppPerSuite {
 
   val fakeRequestWithRightAuthHeaders = FakeRequest().withHeaders(
     "App-key" -> rightAppKey, "Access-token" -> rightAccessToken)
+
+  val fakeRequestWithRightAuthHeaders_user2 = FakeRequest().withHeaders(
+    "App-key" -> rightAppKey, "Access-token" -> rightAccessToken2)
 
   val fakeRequestWith_RightAppKey_WrongAccessToken = FakeRequest().withHeaders(
     "App-key" -> rightAppKey, "Access-token" -> "wrong access token")

@@ -73,8 +73,8 @@ class TaskController @Inject()(actions: Actions, taskDAO: TaskDAO, projectDAO: P
 
   def update(taskId: Long) = actions.AuthAction.async { implicit request =>
 
-    taskDAO.isTaskOwner(taskId, request.userId).flatMap { ownerOpt =>
-      if (ownerOpt.isEmpty)
+    taskDAO.isTaskOwner(taskId, request.userId).flatMap { isOwner =>
+      if (! isOwner)
         Future.successful(Forbidden(JsonErrors.ChangingSomeoneElsesObject))
       else {
         val jsonTask = Form(
@@ -109,8 +109,8 @@ class TaskController @Inject()(actions: Actions, taskDAO: TaskDAO, projectDAO: P
   }
 
   def delete(taskId: Long) = actions.AuthAction.async { implicit request =>
-    taskDAO.isTaskOwner(taskId, request.userId).flatMap { ownerOpt =>
-      if (ownerOpt.isEmpty)
+    taskDAO.isTaskOwner(taskId, request.userId).flatMap { isOwner =>
+      if (! isOwner)
         Future.successful(Forbidden(JsonErrors.DeletingSomeoneElsesObject))
       else {
         taskDAO.deleteTask(taskId).map { deletedNum =>

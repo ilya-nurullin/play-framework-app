@@ -99,7 +99,9 @@ class TaskDAO @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit ec: 
   }
 
   def isTaskOwner(taskId: Long, userId: Int) = dbConfig.db.run {
-    usersHasTasks.filter(r => r.userId === userId && r.taskId === taskId).take(1).result.headOption
+    usersHasTasks.filter(r => r.userId === userId && r.taskId === taskId).take(1).result.headOption.collect {
+      case task => task.isDefined
+    }
   }
 
   def updateTask(taskId: Long,  title: String, projectId: Long, description: Option[String], deadline: Option[DateTime],
@@ -122,6 +124,10 @@ class TaskDAO @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit ec: 
     createNewTask(userId, Task(0, messages("tasks.greetingTasks.first.title"), projectId))
     createNewTask(userId, Task(0, messages("tasks.greetingTasks.second.title"), projectId))
     createNewTask(userId, Task(0, messages("tasks.greetingTasks.third.title"), projectId))
+  }
+
+  def getAllTaskOwners(taskId: Long) = dbConfig.db.run {
+    usersHasTasks.filter(_.taskId === taskId).map(_.userId).result
   }
 
 }

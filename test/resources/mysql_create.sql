@@ -128,9 +128,9 @@ CREATE TABLE IF NOT EXISTS `tasks` (
 -- Дамп данных таблицы whipcake.tasks: ~28 rows (приблизительно)
 /*!40000 ALTER TABLE `tasks` DISABLE KEYS */;
 INSERT INTO `tasks` (`id`, `title`, `project_id`, `description`, `deadline`, `data`, `importance`, `complexity`, `created_at`, `updated_at`,`is_open_for_surety`, `is_archived`) VALUES
-  (1, 'First test task', 1, 'descr1', NULL, '{"key": "val"}', 1, 3, '2017-05-29 17:17:37', '2017-07-07 11:18:31', 0, 0),
+  (1, 'First test task', 1, 'descr1', NULL, '{"key": "val"}', 1, 3, '2017-05-29 17:17:37', '2017-07-07 11:18:31', 1, 0),
   (2, 'Second test task', 1, 'descr2', NULL, '{"key": "val"}', 3, 1, '2017-05-29 17:17:37', '2017-07-07 11:18:31', 0, 0),
-  (3, 'New Task', 1, NULL, NULL, NULL, NULL, NULL, '2017-06-23 09:05:26', '2017-07-07 11:18:31', 0, 0),
+  (3, 'New Task', 1, NULL, NULL, NULL, NULL, NULL, '2017-06-23 09:05:26', '2017-07-07 11:18:31', 1, 0),
   (4, 'New Task', 1, NULL, NULL, NULL, NULL, NULL, '2017-06-23 09:05:59', '2017-07-07 11:18:31', 0, 0),
   (5, 'New Task', 1, 'desc', NULL, NULL, NULL, NULL, '2017-06-23 09:08:39', '2017-07-07 11:18:31', 0, 0),
   (6, 'New Task', 1, 'desc', NULL, NULL, NULL, 3, '2017-06-23 09:09:17', '2017-07-07 11:18:31', 0, 0),
@@ -180,6 +180,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `soc_networks` json DEFAULT NULL,
   `default_project` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
   `can_be_guarantor` TINYINT(1) UNSIGNED NOT NULL DEFAULT '1',
+  `lang` VARCHAR(10) NOT NULL DEFAULT 'en',
   PRIMARY KEY (`id`),
   UNIQUE KEY `login_UNIQUE` (`login`),
   UNIQUE KEY `email_UNIQUE` (`email`),
@@ -194,8 +195,9 @@ CREATE TABLE IF NOT EXISTS `users` (
 -- Дамп данных таблицы whipcake.users: ~2 rows (приблизительно)
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` (`id`, `login`, `email`, `pass_hash`, `name`, `avatar`, `about_myself`, `date_of_birth`, `sex`, `created_at`, `updated_at`, `city_id`, `statuses`, `user_rank_id`, `premium_until`, `is_banned`, `soc_networks`, `default_project`) VALUES
-  (1, 'testLogin', 'test', '$2a$10$gZtzxmt1KJICEFFLZdyMDefn8Cmc2hoE9c0oBhp5dlWEfJ9y5enyi' /*PASS: testPassword*/, 'testName', 'testAva', 'testAboutMyself', NULL, FALSE, '2017-05-01 21:10:14', '2017-06-15 22:37:07', 1, '["testStatus"]', 1, '2017-05-01 21:10:14', 0, NULL, 1),
-  (2, 'id2', 'testemail@testdomain.test', '$2a$10$ExnMSd2gA.oeMebTAcq9iujqSbKfLVoWwJEH/RJWP6LahRULm1/Hi', NULL, NULL, NULL, NULL, TRUE, '2017-05-20 21:28:57', '2017-05-20 21:28:58', NULL, NULL, 1, NULL, 0, NULL, 2);
+  (1, 'testLogin', 'test@test.test', '$2a$10$gZtzxmt1KJICEFFLZdyMDefn8Cmc2hoE9c0oBhp5dlWEfJ9y5enyi' /*PASS: testPassword*/, 'testName', 'testAva', 'testAboutMyself', NULL, FALSE, '2017-05-01 21:10:14', '2017-06-15 22:37:07', 1, '["testStatus"]', 1, '2017-05-01 21:10:14', 0, NULL, 1),
+  (2, 'id2', 'testemail@testdomain.test', '$2a$10$ExnMSd2gA.oeMebTAcq9iujqSbKfLVoWwJEH/RJWP6LahRULm1/Hi', NULL, NULL, NULL, NULL, TRUE, '2017-05-20 21:28:57', '2017-05-20 21:28:58', NULL, NULL, 1, NULL, 0, NULL, 2),
+  (3, 'id3', 'testemail1@testdomain.test', '$2a$10$ExnMSd2gA.oeMebTAcq9iujqSbKfLVoWwJEH/RJWP6LahRULm1/Hi', NULL, NULL, NULL, NULL, TRUE, '2017-05-20 21:28:57', '2017-05-20 21:28:58', NULL, NULL, 1, NULL, 0, NULL, 2);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 
 -- Дамп структуры для таблица whipcake.users_has_api_tokens
@@ -217,7 +219,7 @@ CREATE TABLE IF NOT EXISTS `user_has_api_token` (
 -- Дамп данных таблицы whipcake.users_has_api_tokens: ~4 rows (приблизительно)
 /*!40000 ALTER TABLE `user_has_api_token` DISABLE KEYS */;
 INSERT INTO `user_has_api_token` (`token`, `user_id`, `app_id`, `firebase_token`, `expires_at`) VALUES
-  ('2', 2, 1, 'asd', '2017-07-24 11:16:11'),
+  ('2', 2, 1, 'asd', ADDDATE(NOW(), INTERVAL 17 DAY)),
   ('ft1IjFotneQESvMktZqVrQ4Xas0weJ', 1, 2, 'asd', ADDDATE(NOW(), INTERVAL 17 DAY)),
   ('PjdSyBX62WSq8b1IEOEFMfsjBYZcpP', 1, 1, 'asd',ADDDATE(NOW(), INTERVAL 17 DAY));
 /*!40000 ALTER TABLE `user_has_api_token` ENABLE KEYS */;
@@ -322,6 +324,31 @@ CREATE TABLE `user_has_last_sync_id` (
   INDEX `fk_users_has_api_apps_api_apps1_idx` (`app_id`),
   CONSTRAINT `fk_users_has_api_apps_api_apps1` FOREIGN KEY (`app_id`) REFERENCES `api_apps` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT `fk_users_has_api_apps_users2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
+) COLLATE='utf8_general_ci' ENGINE=InnoDB;
+
+DROP TABLE IF EXISTS `surety`;
+CREATE TABLE `surety` (
+  `task_id` BIGINT(20) UNSIGNED NOT NULL,
+  `guarantor_id` INT(10) UNSIGNED NULL DEFAULT NULL,
+  `status` ENUM('finding_guarantors','executing','finished') NULL DEFAULT NULL,
+  `allowed_count` TINYINT(3) UNSIGNED NULL DEFAULT NULL,
+  `time_from` TIME NULL DEFAULT NULL,
+  `time_to` TIME NULL DEFAULT NULL,
+  PRIMARY KEY (`task_id`),
+  INDEX `FK_surety_users` (`guarantor_id`),
+  CONSTRAINT `FK_surety_tasks` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT `FK_surety_users` FOREIGN KEY (`guarantor_id`) REFERENCES `users` (`id`) ON UPDATE SET NULL ON DELETE SET NULL
+) COLLATE='utf8_general_ci' ENGINE=InnoDB;
+
+DROP TABLE IF EXISTS `surety_requests`;
+CREATE TABLE `surety_requests` (
+  `task_id` BIGINT(20) UNSIGNED NOT NULL,
+  `guarantor_id` INT(10) UNSIGNED NOT NULL,
+  `status` ENUM('considering','rejected','approved') NOT NULL DEFAULT 'considering',
+  PRIMARY KEY (`task_id`, `guarantor_id`),
+  INDEX `FK_surety_requests_users` (`guarantor_id`),
+  CONSTRAINT `FK_surety_requests_tasks` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT `FK_surety_requests_users` FOREIGN KEY (`guarantor_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) COLLATE='utf8_general_ci' ENGINE=InnoDB;
 
 

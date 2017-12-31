@@ -8,3 +8,13 @@ project.default.name = Default project
 
 registration.email.title = Congratulate with registration
 registration.email.body = Congratulate with registration body
+
+firebase.suretyRequest.title = New surety request
+firebase.suretyRequest.body = You have new surety request. Click here to learn more.
+
+firebase.approveRequest.title = Your request is approval
+firebase.approveRequest.body = Your request is approval
+
+firebase.sendWhip.title = Whip!
+firebase.sendWhip.bodyWithMessage = Do your task. Message: {0}
+firebase.sendWhip.bodyWoMessage = Do your task. Message: {0}

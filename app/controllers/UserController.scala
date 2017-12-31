@@ -3,6 +3,7 @@ package controllers
 import javax.inject._
 
 import actions.Actions
+import controllers.UserController.UserToUpdate
 import errorJsonBodies.JsonErrors
 import helpers.{JsonFormHelper, UserRegistration}
 import models._
@@ -27,14 +28,12 @@ class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient:
     extends InjectedController with I18nSupport {
 
   val AuthAction = actions.AuthAction
-  implicit val fullUserFormat = Json.format[FullUserJson]
+  implicit val fullUserFormat = Json.format[UserController.FullUserJson]
 
   def get(id: Int) = AuthAction.async {
     userDAO.getById(id).map { userOpt =>
       userOpt.map { user =>
-        val jsonUser = Json.toJson(userRow2FullJsonUser(user))
-
-        Ok(jsonUser)
+        Ok(Json.toJson(UserController.userRow2FullJsonUser(user)))
       } getOrElse NotFound(JsNull)
     }
   }
@@ -86,7 +85,7 @@ class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient:
         "sex" -> optional(boolean),
         "cityId" -> optional(number),
         "canBeGuarantor" -> requiredBoolean,
-      )(UserToUpdate.apply)(UserToUpdate.unapply)
+      )(UserController.UserToUpdate.apply)(UserController.UserToUpdate.unapply)
     )
 
     JsonFormHelper.asyncJsonForm(jsonUser) { userData =>
@@ -94,7 +93,7 @@ class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient:
         userData.dateOfBirth, userData.sex, userData.cityId, userData.canBeGuarantor
       ).map { user =>
 
-        val jsonUser = Json.toJson(userRow2FullJsonUser(user))
+        val jsonUser = Json.toJson(UserController.userRow2FullJsonUser(user))
         Ok(jsonUser)
 
       }.recover {
@@ -150,37 +149,40 @@ class UserController @Inject()(userDAO: UserDAO, actions: Actions, mailerClient:
     }
   }
 
+
+}
+object UserController {
   def userRow2FullJsonUser(user: User) = FullUserJson(user.id, user.login, user.name, user.avatar, user.aboutMyself,
     user.dateOfBirth, user.sex, user.cityId, user.statuses, user.userRankId, user.premiumUntil, user.isBanned, user.defaultProject,
     user.canBeGuarantor)
 
-
   case class FullUserJson(
-                           id: Int,
-                           login: String,
-                           name: Option[String],
-                           avatar: Option[String],
-                           aboutMyself: Option[String],
-                           dateOfBirth: Option[java.sql.Date],
-                           sex: Option[Boolean],
-                           cityId: Option[Int],
-                           statuses: Option[String],
-                           userRankId: Int,
-                           premiumUntil: Option[DateTime],
-                           isBanned: Boolean,
-                           defaultProject: Option[Long],
-                           canBeGuarantor: Boolean
+                             id: Int,
+                             login: String,
+                             name: Option[String],
+                             avatar: Option[String],
+                             aboutMyself: Option[String],
+                             dateOfBirth: Option[java.sql.Date],
+                             sex: Option[Boolean],
+                             cityId: Option[Int],
+                             statuses: Option[String],
+                             userRankId: Int,
+                             premiumUntil: Option[DateTime],
+                             isBanned: Boolean,
+                             defaultProject: Option[Long],
+                             canBeGuarantor: Boolean
                          )
 
   case class UserToUpdate(
-                           login: String,
-                           email: String,
-                           name: Option[String],
-                           avatar: Option[String],
-                           aboutMyself: Option[String],
-                           dateOfBirth: Option[java.sql.Date],
-                           sex: Option[Boolean],
-                           cityId: Option[Int],
-                           canBeGuarantor: Boolean,
+                             login: String,
+                             email: String,
+                             name: Option[String],
+                             avatar: Option[String],
+                             aboutMyself: Option[String],
+                             dateOfBirth: Option[java.sql.Date],
+                             sex: Option[Boolean],
+                             cityId: Option[Int],
+                             canBeGuarantor: Boolean,
                          )
+
 }

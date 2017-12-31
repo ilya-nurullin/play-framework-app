@@ -4,37 +4,42 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET       /                             controllers.HomeController.index
+GET       /                                controllers.HomeController.index
 
-POST      /auth/email                   controllers.AuthController.emailAuth
-POST      /auth/oauth                   controllers.OAuthController.auth(network: String)
-DELETE    /auth                         controllers.AuthController.logout
+POST      /auth/email                      controllers.AuthController.emailAuth
+POST      /auth/oauth                      controllers.OAuthController.auth(network: String)
+DELETE    /auth                            controllers.AuthController.logout
 
-POST      /reg/oauth                    controllers.OAuthController.registration(network: String)
+POST      /reg/oauth                       controllers.OAuthController.registration(network: String)
 
-GET       /last_sync_id                 controllers.SyncController.lastSyncId
+GET       /last_sync_id                    controllers.SyncController.lastSyncId
 
-GET       /users/me                     controllers.UserController.getMe
-GET       /users/:id                    controllers.UserController.get(id: Int)
-POST      /users                        controllers.UserController.create
-PUT       /users/me                     controllers.UserController.update
-PUT       /users/me/password            controllers.UserController.changePassword
-PUT       /users/me/default_project     controllers.UserController.changeDefaultProject
+GET       /users/me                        controllers.UserController.getMe
+GET       /users/:id                       controllers.UserController.get(id: Int)
+POST      /users                           controllers.UserController.create
+PUT       /users/me                        controllers.UserController.update
+PUT       /users/me/password               controllers.UserController.changePassword
+PUT       /users/me/default_project        controllers.UserController.changeDefaultProject
 
-GET       /tasks                        controllers.TaskController.getLatestTasks(start_with: Long ?= 0)
-POST      /tasks                        controllers.TaskController.create(syncId: Option[Long])
-GET       /tasks/:taskId                controllers.TaskController.get(taskId: Long)
-PUT       /tasks/:taskId                controllers.TaskController.update(taskId: Long)
-DELETE    /tasks/:taskId                controllers.TaskController.delete(taskId: Long)
+GET       /tasks                           controllers.TaskController.getLatestTasks(start_with: Long ?= 0)
+POST      /tasks                           controllers.TaskController.create(syncId: Option[Long])
+GET       /tasks/:taskId                   controllers.TaskController.get(taskId: Long)
+PUT       /tasks/:taskId                   controllers.TaskController.update(taskId: Long)
+DELETE    /tasks/:taskId                   controllers.TaskController.delete(taskId: Long)
 
-GET       /projects                     controllers.ProjectController.getLatestProjects(start_with: Long ?= 0)
-GET       /projects/:projectId/tasks    controllers.ProjectController.getTasks(projectId: Long, start_with: Long ?= 0)
-POST      /projects                     controllers.ProjectController.create(syncId: Option[Long])
-GET       /projects/:projectId          controllers.ProjectController.get(projectId: Long)
-PUT       /projects/:projectId          controllers.ProjectController.update(projectId: Long)
-DELETE    /projects/:projectId          controllers.ProjectController.delete(projectId: Long)
+GET       /projects                        controllers.ProjectController.getLatestProjects(start_with: Long ?= 0)
+GET       /projects/:projectId/tasks       controllers.ProjectController.getTasks(projectId: Long, start_with: Long ?= 0)
+POST      /projects                        controllers.ProjectController.create(syncId: Option[Long])
+GET       /projects/:projectId             controllers.ProjectController.get(projectId: Long)
+PUT       /projects/:projectId             controllers.ProjectController.update(projectId: Long)
+DELETE    /projects/:projectId             controllers.ProjectController.delete(projectId: Long)
 
-PUT       /firebase/user_token          controllers.FirebaseController.updateFirebaseUsersToken
+GET       /surety/guarantors/top           controllers.SuretyController.topGuarantors
+PUT       /surety/tasks/:taskId/approve    controllers.SuretyController.approveSuretyRequest(taskId: Long)
+POST      /surety/tasks/:taskId            controllers.SuretyController.sendSuretyRequest(taskId: Long)
+POST      /surety/tasks/:taskId/whip       controllers.SuretyController.whip(taskId: Long)
+
+PUT       /firebase/user_token             controllers.FirebaseController.updateFirebaseUsersToken
 
 # Map static resources from the /public folder to the /assets URL path
 #GET           /assets/*file         controllers.Assets.versioned(path="/public", file: Asset)
