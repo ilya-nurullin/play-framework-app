@@ -20,7 +20,7 @@ case class Surety(taskId: Long, guarantorId: Option[Int] = None, status: SuretyT
 class SuretyTable(tag: Tag) extends Table[Surety](tag, "surety") with JsArrayMappedColumn
     with SuretyTable.SuretyStatusTypeMappedColumn {
 
-  implicit val suretyStatusTypeColumn = suretyStatusTypeColumnType // why does not it work without this?
+  implicit val suretyStatusTypeColumn = suretyStatusTypeColumnType // why doesn't it work without this?
 
   def taskId = column[Long]("task_id", O.PrimaryKey)
   def guarantorId = column[Option[Int]]("guarantor_id")
